@@ -131,6 +131,8 @@ REST_FRAMEWORK = {
     ]
 }
 
+APPEND_SLASH=False
+
 
 CORS_ALLOWED_ORIGINS = [
     'https://temp-sense.cohe.ro',
@@ -152,4 +154,3 @@ CHIRPSTACK_URL = os.environ.get('CHIRPSTACK_URL', 'https://console.iot-wireless.
 CHIRPSTACK_API_TOKEN = os.environ.get('CHIRPSTACK_API_TOKEN')
 CHIRPSTACK_APPLICATION_ID = os.environ.get('CHIRPSTACK_APPLICATION_ID')
 CHIRPSTACK_DEVICE_PROFILE_ID = os.environ.get('CHIRPSTACK_DEVICE_PROFILE_ID')
-

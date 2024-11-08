@@ -28,7 +28,7 @@ class DeviceReading(models.Model):
         db_table = 'device_reading'
 
     def __str__(self):
-        return f"{self.dev_eui}_{self.bat_status}"
+        return f"{self.dev_eui}"
 
 
 class DeviceData(models.Model):
