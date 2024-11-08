@@ -33,11 +33,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api',
     'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -128,6 +130,15 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ]
 }
+
+
+CORS_ALLOWED_ORIGINS = [
+    'https://temp-sense.cohe.ro',
+    ]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://temp-sense.cohe.ro',
+    ]
 
 DAILY_EMAIL_SCHEDULED_HOUR = os.environ.get('DAILY_EMAIL_SCHEDULED_HOUR', 19)  # 12 AM
 OFFICE_EMAIL = os.environ.get('OFFICE_EMAIL', 'office@cohe.ro')
