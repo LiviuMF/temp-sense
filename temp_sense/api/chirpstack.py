@@ -5,7 +5,8 @@ import requests
 
 def create_device(
         dev_eui: str,
-        join_eui: str,
+        dev_name: str,
+        dev_join_eui: str,
 ) -> None:
     payload = {
         "device": {
@@ -14,8 +15,8 @@ def create_device(
             "devEui": dev_eui,
             "deviceProfileId": settings.CHIRPSTACK_DEVICE_PROFILE_ID,
             "isDisabled": False,
-            "joinEui": join_eui,
-            "name": "LHT65",
+            "joinEui": dev_join_eui,
+            "name": dev_name,
             "skipFcntCheck": True,
             "tags": {
                 "additionalProp1": "",

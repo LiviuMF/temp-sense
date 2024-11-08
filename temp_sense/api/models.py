@@ -49,4 +49,8 @@ class DeviceData(models.Model):
 @receiver(post_save, sender=DeviceData)
 def create_chirpstack_entity(sender, instance, created, **kwargs):
     if created:
-        chirpstack.create_device(instance.dev_eui, instance.dev_join_eui)
+        chirpstack.create_device(
+            dev_eui=instance.dev_eui,
+            dev_name=f"{instance.dev_owner}_{instance.dev_name}",
+            dev_join_eui=instance.dev_join_eui,
+        )
