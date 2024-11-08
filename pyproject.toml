@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "temp-sense"
+version = "0.1.0"
+description = ""
+authors = ["Lemongrass Tech"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^5.1.2"
+djangorestframework = "^3.15.2"
+python-dotenv = "^1.0.1"
+matplotlib = "^3.9.2"
+pymupdf = "^1.24.13"
+requests = "^2.32.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
