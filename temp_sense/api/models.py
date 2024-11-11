@@ -34,11 +34,16 @@ class DeviceReading(models.Model):
 
 class DeviceData(models.Model):
     dev_eui = models.CharField(max_length=50, unique=True)
-    dev_join_eui = models.CharField(max_length=50, unique=True)
+    dev_join_eui = models.CharField(max_length=50)
+    dev_app_key = models.CharField(max_length=50, unique=True)
     dev_name = models.CharField(max_length=100)
     dev_owner = models.CharField(max_length=100)
     dev_owner_email = models.EmailField()
     dev_owner_address = models.CharField(max_length=100)
+
+    def clean(self, *args, **kwargs):
+        self.dev_eui = str(self.dev_eui).lower()
+        self.dev_join_eui = str(self.dev_join_eui).lower()
 
     class Meta:
         db_table = 'device_data'
