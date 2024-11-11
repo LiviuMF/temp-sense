@@ -61,7 +61,12 @@ def create_chirpstack_entity(sender, instance, created, **kwargs):
             dev_name=f"{instance.dev_owner}_{instance.dev_name}",
             dev_join_eui=instance.dev_join_eui,
         )
+        logger.info("Created chirpstack entity")
+        logger.info('Waiting 3 seconds to register device...')
+        import time
+        time.sleep(3)
         chirpstack.register_device(
             dev_eui=instance.dev_eui,
             dev_app_key=instance.dev_app_key,
         )
+        logger.info('Registered chirpstack entity')
