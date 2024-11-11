@@ -26,6 +26,7 @@ class DeviceReading(models.Model):
 
     class Meta:
         db_table = 'device_reading'
+        ordering = ['-date', '-time']
 
     def __str__(self):
         return f"{self.dev_eui}"
