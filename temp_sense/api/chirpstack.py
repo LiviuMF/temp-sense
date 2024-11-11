@@ -43,7 +43,7 @@ def register_device(
             "nwkKey": dev_app_key
         }
     }
-    make_request(f"/{dev_eui}/activate", payload)
+    make_request(f"/{dev_eui}/keys", payload)
 
 
 def make_request(url_path: str, payload: dict) -> None:
