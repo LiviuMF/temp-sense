@@ -18,11 +18,12 @@ class DeviceReading(models.Model):
     hum_sht = models.CharField(max_length=50)
     tempc_ds = models.CharField(max_length=50)
     tempc_sht = models.CharField(max_length=50)
-    dev_eui = models.ForeignKey('DeviceData', on_delete=models.CASCADE, related_name='device_data')
+    dev_eui = models.ForeignKey('DeviceData', on_delete=models.SET_NULL, related_name='device_data', null=True)
     timestamp = models.CharField(max_length=50)
     current_time = models.CharField(max_length=50, null=True, blank=True)
     date = models.DateField()
     time = models.TimeField()
+    legacy_id = models.CharField(max_length=50)
 
     class Meta:
         db_table = 'device_reading'
@@ -35,7 +36,7 @@ class DeviceReading(models.Model):
 class DeviceData(models.Model):
     dev_eui = models.CharField(max_length=50, unique=True)
     dev_join_eui = models.CharField(max_length=50)
-    dev_app_key = models.CharField(max_length=50, unique=True)
+    dev_app_key = models.CharField(max_length=50)
     dev_name = models.CharField(max_length=100)
     dev_owner = models.CharField(max_length=100)
     dev_owner_email = models.EmailField()
@@ -59,4 +60,8 @@ def create_chirpstack_entity(sender, instance, created, **kwargs):
             dev_eui=instance.dev_eui,
             dev_name=f"{instance.dev_owner}_{instance.dev_name}",
             dev_join_eui=instance.dev_join_eui,
+        )
+        chirpstack.register_device(
+            dev_eui=instance.dev_eui,
+            dev_app_key=instance.dev_app_key,
         )

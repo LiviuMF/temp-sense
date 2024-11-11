@@ -16,6 +16,7 @@ def process_payload(payload: dict) -> dict:
             "current_time": current_timestamp.isoformat(),
             "date": current_timestamp.date().isoformat(),
             "time": current_timestamp.time().isoformat(),
+            "legacy_id": payload["deviceInfo"]["devEui"],
         }
     )
     return {k.lower(): v for k, v in cleaned_data.items()}

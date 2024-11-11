@@ -30,10 +30,26 @@ def create_device(
             }
         }
     }
+    make_request("", payload)
 
+
+def register_device(
+        dev_eui: str,
+        dev_app_key: str,
+):
+    payload = {
+        "deviceKeys": {
+            "appKey": dev_app_key,
+            "nwkKey": dev_app_key
+        }
+    }
+    make_request(f"/{dev_eui}/activate", payload)
+
+
+def make_request(url_path: str, payload: dict) -> None:
     try:
         requests.post(
-            settings.CHIRPSTACK_URL,
+            f'{settings.CHIRPSTACK_URL}{url_path}',
             headers={
                 'Authorization': f'Bearer {settings.CHIRPSTACK_API_TOKEN}',
                 'Content-Type': 'application/json',
