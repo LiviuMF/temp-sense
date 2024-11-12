@@ -41,7 +41,7 @@ def register_device(
     payload = {
         "deviceKeys": {
             "appKey": dev_app_key,
-            "nwkKey": dev_nwk_key
+            "nwkKey": dev_app_key  # chirpstack platform bug
         }
     }
     make_request(f"/{dev_eui}/keys", payload)
