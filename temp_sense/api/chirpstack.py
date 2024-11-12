@@ -36,11 +36,12 @@ def create_device(
 def register_device(
         dev_eui: str,
         dev_app_key: str,
+        dev_nwk_key: str,
 ):
     payload = {
         "deviceKeys": {
             "appKey": dev_app_key,
-            "nwkKey": dev_app_key
+            "nwkKey": dev_nwk_key
         }
     }
     make_request(f"/{dev_eui}/keys", payload)

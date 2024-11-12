@@ -37,6 +37,7 @@ class DeviceData(models.Model):
     dev_eui = models.CharField(max_length=50, unique=True)
     dev_join_eui = models.CharField(max_length=50)
     dev_app_key = models.CharField(max_length=50)
+    dev_nwk_key = models.CharField(max_length=50, null=True, blank=True)
     dev_name = models.CharField(max_length=100)
     dev_owner = models.CharField(max_length=100)
     dev_owner_email = models.EmailField()
