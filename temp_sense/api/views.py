@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
@@ -8,7 +8,7 @@ from .serializers import DeviceDataSerializer, DeviceReadingSerializer
 
 
 def index(request):
-    return HttpResponse("David Online")
+    return HttpResponse("Battlecruiser Operational")
 
 
 class DeviceDataViewSet(viewsets.ModelViewSet):
@@ -25,3 +25,11 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
 
     authentication_classes = [BasicAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        dev_eui = self.request.query_params.get('dev_eui', None)
+        if dev_eui:
+            queryset = queryset.filter(legacy_id=dev_eui)
+        return queryset
