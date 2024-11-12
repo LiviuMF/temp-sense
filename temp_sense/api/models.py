@@ -51,7 +51,7 @@ class DeviceData(models.Model):
         db_table = 'device_data'
 
     def __str__(self):
-        return f"{self.dev_owner}_{self.dev_name}"
+        return f"{self.dev_owner}_{self.dev_name}".upper()
 
 
 @receiver(post_save, sender=DeviceData)
