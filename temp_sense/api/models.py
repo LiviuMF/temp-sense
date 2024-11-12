@@ -67,5 +67,6 @@ def create_chirpstack_entity(sender, instance, created, **kwargs):
         chirpstack.register_device(
             dev_eui=instance.dev_eui,
             dev_app_key=instance.dev_app_key,
+            dev_nwk_key=instance.dev_nwk_key,
         )
         logger.info('Registered chirpstack entity')
