@@ -134,7 +134,7 @@ def send_daily_notification() -> None:
             else:
                 print(f'Device {device.dev_eui} has not sent any data yet')
                 continue
-        owner_details = DeviceData.objects.get(dev_owner=owner)
+        owner_details = DeviceData.objects.filter(dev_owner=owner).first()
         message = build_message_body(
             to_email=owner_details.dev_owner_email,
             subject=f'Hourly temperature for {owner_details.dev_owner}',
