@@ -120,6 +120,8 @@ def send_daily_notification() -> None:
                 hour=TruncHour('time')
             ).values('time', 'hour','tempc_ds','date','current_time').order_by('current_time')
 
+            # this was used to solve unsupported sqlite feature .distinct('value)
+            # switch db to postgres
             sensor_data_clean = fetch_latest_data(sensor_data)
 
             if sensor_data_clean:
