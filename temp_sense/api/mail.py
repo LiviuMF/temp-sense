@@ -38,7 +38,7 @@ def plot_graph(plot_data: list[dict]) -> BytesIO:
 
     graph_buffer = BytesIO()  # return as buffer object
     plt.savefig(graph_buffer, format='png', transparent=True)
-
+    plt.close()
     return graph_buffer
 
 
@@ -113,19 +113,18 @@ def send_daily_notification() -> None:
         attachment_details: list[tuple] = []
         owner_devices: list[DeviceData] = DeviceData.objects.filter(dev_owner=owner)
         for device in owner_devices:
-            sensor_data = (((((((
-                DeviceReading.objects.filter(dev_eui=device)
-                .filter(date__gte=(datetime.now() - timedelta(days=1)).date()))
-                .annotate(hour=TruncHour('time')))
-                .values('date', 'hour'))
-                .annotate(time=Max('time')))
-                .order_by('-date', '-hour'))
-                .distinct())
-                .values('date', 'time', 'tempc_ds')
-            )[:24]
-            if sensor_data:
+            sensor_data = DeviceReading.objects.filter(
+                dev_eui=device,
+                date__gte=(datetime.now() - timedelta(days=1)).date()
+            ).annotate(
+                hour=TruncHour('time')
+            ).values('time', 'hour','tempc_ds','date','current_time').order_by('current_time')
+
+            sensor_data_clean = fetch_latest_data(sensor_data)
+
+            if sensor_data_clean:
                 pdf_table = plot_report(
-                    data=sensor_data,
+                    data=sensor_data_clean,
                     client_name=owner,
                     client_address=device.dev_owner_address,
                     device_name=device.dev_name,
@@ -143,3 +142,22 @@ def send_daily_notification() -> None:
         )
         send_email(to_email=settings.ADMIN_EMAIL, message_body=message)
         logger.info(f'Successfully sent email to {send_email}')
+
+
+def fetch_latest_data(temp_data: list[dict]) -> list[dict]:
+    sorted_data = sorted(temp_data, key=lambda x: x['current_time'])
+
+    results = []
+    for index, d in enumerate(sorted_data):
+        if index < len(sorted_data) - 1:
+            next_element = sorted_data[index + 1]
+            if d['hour'] == next_element['hour']:
+                continue
+            results.append({
+                'tempc_ds': d['tempc_ds'],
+                'time': d['time'],
+                'date': d['date'],
+
+            })
+
+    return results[-24:]
