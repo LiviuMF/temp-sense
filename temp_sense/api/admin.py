@@ -3,7 +3,7 @@ from .models import DeviceData, DeviceReading
 
 
 class ReadingsAdmin(admin.ModelAdmin):
-    list_display = ('dev_eui', 'current_time')
+    list_display = ('dev_eui', 'timestamp')
 
 
 admin.site.register(DeviceData)

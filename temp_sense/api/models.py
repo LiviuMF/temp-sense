@@ -19,15 +19,12 @@ class DeviceReading(models.Model):
     tempc_ds = models.CharField(max_length=50)
     tempc_sht = models.CharField(max_length=50)
     dev_eui = models.ForeignKey('DeviceData', on_delete=models.SET_NULL, related_name='device_data', null=True)
-    timestamp = models.CharField(max_length=50)
-    current_time = models.CharField(max_length=50, null=True, blank=True)
-    date = models.DateField()
-    time = models.TimeField()
+    timestamp = models.DateTimeField()
     legacy_id = models.CharField(max_length=50)
 
     class Meta:
         db_table = 'device_reading'
-        ordering = ['-date', '-time']
+        ordering = ['-timestamp']
 
     def __str__(self):
         return f"{self.dev_eui}"

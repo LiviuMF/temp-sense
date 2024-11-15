@@ -10,25 +10,17 @@ import matplotlib.pyplot as plt
 import pymupdf
 
 from django.conf import settings
-from django.db.models.functions import TruncHour
-from django.db.models import Max
+from django.utils import timezone
 
 from .models import DeviceData, DeviceReading
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-TODAY = datetime.now()
-
-
-def extract_datetime(device_data: dict) -> datetime:
-    return datetime.strptime(
-        f'{device_data["date"]} {device_data["time"]}',
-        "%Y-%m-%d %H:%M:%S"
-    )
+TZ_NOW = timezone.now().replace(microsecond=0, tzinfo=None)
 
 
 def plot_graph(plot_data: list[dict]) -> BytesIO:
-    x_values = [extract_datetime(p) for p in plot_data]
+    x_values = [p['time'] for p in plot_data]
     y_values = [float(p['tempc_ds']) for p in plot_data]
 
     plt.plot(
@@ -57,12 +49,13 @@ def plot_report(data: list[dict], client_name: str, client_address: str, device_
     row_height = 20.18
     for index, device in enumerate(data):
         text_position = (80, 295+(index * row_height))
-        page.insert_text(text_position, f"{device['date']}  {device['time']}", fontsize=12, color=(0, 0, 0))
+        page.insert_text(text_position, f"{device['date']}  {device['time'].time().replace(microsecond=0)}", fontsize=12, color=(0, 0, 0))
         page.insert_text((text_position[0]+300, text_position[1]), device['tempc_ds'], fontsize=12, color=(0, 0, 0))
 
 
     report_buffer = BytesIO()
     template_pdf.save(report_buffer)
+    template_pdf.close()
     return report_buffer
 
 
@@ -81,11 +74,12 @@ def build_message_body(
 
     if attachments:
         for table_pdf, device_data in attachments:
+            file_name: str = f'{device_data.dev_owner}_{device_data.dev_name}'
             attachment = MIMEApplication(table_pdf.getvalue(), _subtype='pdf')
             attachment.add_header(
                 'Content-Disposition',
                 'attachment',
-                filename=f'{device_data.dev_owner}_{device_data.dev_name}_{TODAY.strftime("%Y%m%d%_H%M%S")}.pdf'
+                filename=f'{file_name}_{TZ_NOW}.pdf'
             )
             msg.attach(attachment)
 
@@ -113,16 +107,11 @@ def send_daily_notification() -> None:
         attachment_details: list[tuple] = []
         owner_devices: list[DeviceData] = DeviceData.objects.filter(dev_owner=owner)
         for device in owner_devices:
-            sensor_data = DeviceReading.objects.filter(
-                dev_eui=device,
-                date__gte=(datetime.now() - timedelta(days=1)).date()
-            ).annotate(
-                hour=TruncHour('time')
-            ).values('time', 'hour','tempc_ds','date','current_time').order_by('current_time')
+            sensor_data = DeviceReading.objects.filter(dev_eui=device,timestamp__gte=(TZ_NOW - timedelta(days=1))).values('tempc_ds', 'timestamp').order_by('timestamp')
 
-            # this was used to solve unsupported sqlite feature .distinct('value)
+            # it's used to solve unsupported sqlite feature .distinct('value)
             # switch db to postgres
-            sensor_data_clean = fetch_latest_data(sensor_data)
+            sensor_data_clean = group_data_by_hour(sensor_data)
 
             if sensor_data_clean:
                 pdf_table = plot_report(
@@ -146,20 +135,19 @@ def send_daily_notification() -> None:
         logger.info(f'Successfully sent email to {send_email}')
 
 
-def fetch_latest_data(temp_data: list[dict]) -> list[dict]:
-    sorted_data = sorted(temp_data, key=lambda x: x['current_time'])
+def group_data_by_hour(temp_data: list[dict]) -> list[dict]:
+    sorted_data = sorted(temp_data, key=lambda x: x['timestamp'])
 
     results = []
     for index, d in enumerate(sorted_data):
         if index < len(sorted_data) - 1:
             next_element = sorted_data[index + 1]
-            if d['hour'] == next_element['hour']:
+            if d['timestamp'].hour == next_element['timestamp'].hour:
                 continue
             results.append({
                 'tempc_ds': d['tempc_ds'],
-                'time': d['time'],
-                'date': d['date'],
+                'time': d['timestamp'],
+                'date': d['timestamp'].date(),
 
             })
-
     return results[-24:]
