@@ -144,10 +144,10 @@ def group_data_by_hour(temp_data: list[dict]) -> list[dict]:
             next_element = sorted_data[index + 1]
             if d['timestamp'].hour == next_element['timestamp'].hour:
                 continue
-            results.append({
-                'tempc_ds': d['tempc_ds'],
-                'time': d['timestamp'],
-                'date': d['timestamp'].date(),
+        results.append({
+            'tempc_ds': d['tempc_ds'],
+            'time': d['timestamp'],
+            'date': d['timestamp'].date(),
 
-            })
+        })
     return results[-24:]
