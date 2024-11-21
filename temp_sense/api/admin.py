@@ -1,10 +1,11 @@
 from django.contrib import admin
+
 from .models import DeviceData, DeviceReading
 
 
 class ReadingsAdmin(admin.ModelAdmin):
-    list_display = ('dev_eui', 'timestamp')
-    ordering = ('-id', )
+    list_display = ("dev_eui", "timestamp")
+    ordering = ("-id",)
 
 
 admin.site.register(DeviceData)
