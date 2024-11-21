@@ -16,6 +16,7 @@ repos:
             name: black
             entry: black
             language: system
+            exclude: 'migrations/'
             types: [python]
           - id: flake8
             name: flake8
