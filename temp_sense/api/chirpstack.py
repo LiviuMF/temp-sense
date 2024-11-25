@@ -1,12 +1,11 @@
-from django.conf import settings
-
 import requests
+from django.conf import settings
 
 
 def create_device(
-        dev_eui: str,
-        dev_name: str,
-        dev_join_eui: str,
+    dev_eui: str,
+    dev_name: str,
+    dev_join_eui: str,
 ) -> None:
     payload = {
         "device": {
@@ -21,27 +20,27 @@ def create_device(
             "tags": {
                 "additionalProp1": "",
                 "additionalProp2": "",
-                "additionalProp3": ""
+                "additionalProp3": "",
             },
             "variables": {
                 "additionalProp1": "",
                 "additionalProp2": "",
-                "additionalProp3": ""
-            }
+                "additionalProp3": "",
+            },
         }
     }
     make_request("", payload)
 
 
 def register_device(
-        dev_eui: str,
-        dev_app_key: str,
-        dev_nwk_key: str,
+    dev_eui: str,
+    dev_app_key: str,
+    dev_nwk_key: str,
 ) -> None:
     payload = {
         "deviceKeys": {
             "appKey": dev_app_key,
-            "nwkKey": dev_app_key  # chirpstack platform bug
+            "nwkKey": dev_app_key,  # chirpstack platform bug
         }
     }
     make_request(f"/{dev_eui}/keys", payload)
@@ -50,12 +49,12 @@ def register_device(
 def make_request(url_path: str, payload: dict) -> None:
     try:
         requests.post(
-            f'{settings.CHIRPSTACK_URL}{url_path}',
+            f"{settings.CHIRPSTACK_URL}{url_path}",
             headers={
-                'Authorization': f'Bearer {settings.CHIRPSTACK_API_TOKEN}',
-                'Content-Type': 'application/json',
+                "Authorization": f"Bearer {settings.CHIRPSTACK_API_TOKEN}",
+                "Content-Type": "application/json",
             },
-            json=payload
+            json=payload,
         )
     except requests.exceptions.RequestException as e:
-        print(f'Request failed with exception: {e}')
+        print(f"Request failed with exception: {e}")

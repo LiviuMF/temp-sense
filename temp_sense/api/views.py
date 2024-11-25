@@ -1,7 +1,7 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 from .models import DeviceData, DeviceReading
 from .serializers import DeviceDataSerializer, DeviceReadingSerializer
@@ -29,12 +29,11 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset
 
-        param = self.request.query_params.get('dev_name', None)
+        param = self.request.query_params.get("dev_name", None)
         if param:
-            dev_owner, dev_name = param.lower().split('_')
+            dev_owner, dev_name = param.lower().split("_")
             device = DeviceData.objects.get(
-                dev_name__iexact=dev_name,
-                dev_owner__iexact=dev_owner
+                dev_name__iexact=dev_name, dev_owner__iexact=dev_owner
             )
             queryset = queryset.filter(dev_eui=device)
         return queryset
