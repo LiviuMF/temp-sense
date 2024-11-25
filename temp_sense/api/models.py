@@ -1,9 +1,9 @@
-import logging
-import sys
-
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+import logging
+import sys
 
 from . import chirpstack
 
@@ -18,15 +18,13 @@ class DeviceReading(models.Model):
     hum_sht = models.CharField(max_length=50)
     tempc_ds = models.CharField(max_length=50)
     tempc_sht = models.CharField(max_length=50)
-    dev_eui = models.ForeignKey(
-        "DeviceData", on_delete=models.SET_NULL, related_name="device_data", null=True
-    )
+    dev_eui = models.ForeignKey('DeviceData', on_delete=models.SET_NULL, related_name='device_data', null=True)
     timestamp = models.DateTimeField()
     legacy_id = models.CharField(max_length=50)
 
     class Meta:
-        db_table = "device_reading"
-        ordering = ["-timestamp"]
+        db_table = 'device_reading'
+        ordering = ['-timestamp']
 
     def __str__(self):
         return f"{self.dev_eui}"
@@ -47,7 +45,7 @@ class DeviceData(models.Model):
         self.dev_join_eui = str(self.dev_join_eui).lower()
 
     class Meta:
-        db_table = "device_data"
+        db_table = 'device_data'
 
     def __str__(self):
         return f"{self.dev_owner}_{self.dev_name}".upper()
@@ -68,4 +66,4 @@ def create_chirpstack_entity(sender, instance, created, **kwargs):
             dev_app_key=instance.dev_app_key,
             dev_nwk_key=instance.dev_nwk_key,
         )
-        logger.info("Registered chirpstack entity")
+        logger.info('Registered chirpstack entity')
