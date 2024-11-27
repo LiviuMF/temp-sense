@@ -19,7 +19,10 @@ class DeviceReading(models.Model):
     tempc_ds = models.CharField(max_length=50)
     tempc_sht = models.CharField(max_length=50)
     dev_eui = models.ForeignKey(
-        "DeviceData", on_delete=models.SET_NULL, related_name="device_data", null=True
+        "DeviceData",
+        on_delete=models.SET_NULL,
+        related_name="device_readings",
+        null=True,
     )
     timestamp = models.DateTimeField()
     legacy_id = models.CharField(max_length=50)
