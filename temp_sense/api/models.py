@@ -1,5 +1,6 @@
 import logging
 import sys
+from datetime import datetime, timedelta
 
 from django.db import models
 from django.db.models.signals import post_save
@@ -9,6 +10,9 @@ from . import chirpstack
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+NOW = datetime.now()
+last_hour = datetime.now() - timedelta(hours=1)
 
 
 class DeviceReading(models.Model):
@@ -48,6 +52,12 @@ class DeviceData(models.Model):
     def clean(self, *args, **kwargs):
         self.dev_eui = str(self.dev_eui).lower()
         self.dev_join_eui = str(self.dev_join_eui).lower()
+
+    @staticmethod
+    def devices_without_readings_in_the_last_hour():
+        return DeviceData.objects.exclude(
+            device_readings__timestamp__gte=last_hour
+        ).distinct()
 
     class Meta:
         db_table = "device_data"

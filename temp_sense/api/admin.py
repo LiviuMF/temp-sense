@@ -1,22 +1,14 @@
-from datetime import datetime, timedelta
-
 from django.contrib import admin
 from django.utils.html import format_html
 
 from .models import DeviceData, DeviceReading
-
-NOW = datetime.now()
-last_hour = datetime.now() - timedelta(hours=1)
 
 
 class DeviceDataAdmin(admin.ModelAdmin):
     list_display = ("dev_owner", "dev_name", "no_readings")
 
     def no_readings(self, device_data_obj):
-        devices_with_readings_in_the_last_hour = DeviceData.objects.filter(
-            device_readings__timestamp__gte=last_hour
-        ).distinct()
-        if device_data_obj not in devices_with_readings_in_the_last_hour:
+        if device_data_obj in DeviceData.devices_without_readings_in_the_last_hour():
             latest_reading = (
                 DeviceReading.objects.filter(dev_eui=device_data_obj)
                 .order_by("-timestamp")
