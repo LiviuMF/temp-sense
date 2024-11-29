@@ -5,6 +5,9 @@ from .models import DeviceData
 
 class IsInAllowedGroup(permissions.BasePermission):
     def has_permission(self, request, view):
+        if request.user.username.lower() == "chirpstack":
+            return True
+
         if (request.method == "GET") and (
             dev_eui := request.query_params.get("dev_eui")
         ):
@@ -18,4 +21,4 @@ class IsInAllowedGroup(permissions.BasePermission):
                 ) and obj.dev_owner.lower() == request.user.username.lower():
                     return True
 
-            return False
+        return False
