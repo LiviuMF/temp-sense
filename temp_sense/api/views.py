@@ -4,6 +4,7 @@ from rest_framework.authentication import BasicAuthentication, SessionAuthentica
 from rest_framework.permissions import IsAuthenticated
 
 from .models import DeviceData, DeviceReading
+from .permissions import IsInAllowedGroup
 from .serializers import DeviceDataSerializer, DeviceReadingSerializer
 
 
@@ -16,7 +17,7 @@ class DeviceDataViewSet(viewsets.ModelViewSet):
     serializer_class = DeviceDataSerializer
 
     authentication_classes = [BasicAuthentication, SessionAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsInAllowedGroup]
 
 
 class DeviceReadingViewSet(viewsets.ModelViewSet):
@@ -24,16 +25,14 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
     serializer_class = DeviceReadingSerializer
 
     authentication_classes = [BasicAuthentication, SessionAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsInAllowedGroup]
 
     def get_queryset(self):
         queryset = self.queryset
 
-        param = self.request.query_params.get("dev_name", None)
+        param = self.request.query_params.get("dev_eui", None)
         if param:
-            dev_owner, dev_name = param.lower().split("_")
-            device = DeviceData.objects.get(
-                dev_name__iexact=dev_name, dev_owner__iexact=dev_owner
-            )
+            dev_eui = param.lower()
+            device = DeviceData.objects.get(dev_eui=dev_eui)
             queryset = queryset.filter(dev_eui=device)
         return queryset
