@@ -143,7 +143,7 @@ def send_daily_notification() -> None:
             message_body="This is an email from Horepa.ro with hourly temperature",
             attachments=attachment_details,
         )
-        send_email(to_email=settings.ADMIN_EMAIL, message_body=message)
+        send_email(to_email=owner_details.dev_owner_email, message_body=message)
         logger.info(f"Successfully sent email to {send_email}")
 
 
