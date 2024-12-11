@@ -106,6 +106,25 @@ def send_email(
     server.quit()
 
 
+def group_data_by_hour(temp_data: list[dict]) -> list[dict]:
+    sorted_data = sorted(temp_data, key=lambda x: x["timestamp"])
+
+    results = []
+    for index, d in enumerate(sorted_data):
+        if index < len(sorted_data) - 1:
+            next_element = sorted_data[index + 1]
+            if d["timestamp"].hour == next_element["timestamp"].hour:
+                continue
+        results.append(
+            {
+                "tempc_ds": d["tempc_ds"],
+                "time": d["timestamp"],
+                "date": d["timestamp"].date(),
+            }
+        )
+    return results[-24:]
+
+
 def send_daily_notification() -> None:
     dev_owners = DeviceData.objects.all().values_list("dev_owner", flat=True).distinct()
 
@@ -145,22 +164,3 @@ def send_daily_notification() -> None:
         )
         send_email(to_email=owner_details.dev_owner_email, message_body=message)
         logger.info(f"Successfully sent email to {send_email}")
-
-
-def group_data_by_hour(temp_data: list[dict]) -> list[dict]:
-    sorted_data = sorted(temp_data, key=lambda x: x["timestamp"])
-
-    results = []
-    for index, d in enumerate(sorted_data):
-        if index < len(sorted_data) - 1:
-            next_element = sorted_data[index + 1]
-            if d["timestamp"].hour == next_element["timestamp"].hour:
-                continue
-        results.append(
-            {
-                "tempc_ds": d["tempc_ds"],
-                "time": d["timestamp"],
-                "date": d["timestamp"].date(),
-            }
-        )
-    return results[-24:]

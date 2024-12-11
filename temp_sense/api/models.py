@@ -38,6 +38,48 @@ class DeviceReading(models.Model):
     def __str__(self):
         return f"{self.dev_eui}"
 
+    @staticmethod
+    def get_all_device_health_since_date(since_date: datetime):
+        device_health: list[tuple] = []
+        for device in DeviceData.objects.all():
+            readings = DeviceReading.objects.filter(
+                dev_eui_id=device, timestamp__gte=since_date
+            )
+            seconds_since_date: float = readings.aggregate(
+                possible_readings=NOW - models.Min("timestamp")
+            )["possible_readings"].total_seconds()
+
+            actual_readings = [
+                {
+                    "dev_eui_id": r["dev_eui_id"],
+                    "timestamp_till_hour": r["timestamp"].strftime("%Y-%m-%d-%H"),
+                }
+                for r in readings.values("dev_eui_id", "timestamp")
+            ]
+
+            actual_readings_report = {}
+            for reading in actual_readings:
+                if reading["dev_eui_id"] in actual_readings_report:
+                    if (
+                        reading["timestamp_till_hour"]
+                        not in actual_readings_report[reading["dev_eui_id"]]
+                    ):
+                        actual_readings_report[reading["dev_eui_id"]].append(
+                            reading["timestamp_till_hour"]
+                        )
+                else:
+                    actual_readings_report[reading["dev_eui_id"]] = [
+                        reading["timestamp_till_hour"]
+                    ]
+
+            possible_readings: float = round(seconds_since_date / 3600, 0)
+            health_value = round(
+                len(actual_readings_report[device.id]) / possible_readings * 100, 0
+            )
+            device_health.append((device, health_value))
+
+        return device_health
+
 
 class DeviceData(models.Model):
     dev_eui = models.CharField(max_length=50, unique=True)

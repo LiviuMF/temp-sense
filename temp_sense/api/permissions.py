@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import permissions
 
 from .models import DeviceData
@@ -5,7 +6,7 @@ from .models import DeviceData
 
 class IsInAllowedGroup(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.user.username.lower() == "chirpstack":
+        if request.user.username.lower() in settings.API_PERMISSION_EXCEPTIONS:
             return True
 
         if (request.method == "GET") and (
