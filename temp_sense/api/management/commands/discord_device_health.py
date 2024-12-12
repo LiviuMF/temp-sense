@@ -19,4 +19,7 @@ class Command(BaseCommand):
                 if health <= 80
             ]
         )
+        device_health_message = (
+            "Devices with health below 80%:\n" + device_health_message
+        )
         send_message(device_health_message)
