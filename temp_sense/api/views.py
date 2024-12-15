@@ -24,11 +24,9 @@ def device_health(request):
             datetime.strptime(since_date, "%Y-%m-%d")
         )
         if devices_health:
-            devices_health_cleaned = {"data": [{str(d): h} for d, h in devices_health]}
-
-            return JsonResponse(devices_health_cleaned)
+            return JsonResponse(devices_health)
         return HttpResponse(
-            "No data for given interval, default value is set to YESTERDAY"
+            "No device data exists for given interval, default is YESTERDAY"
         )
 
 

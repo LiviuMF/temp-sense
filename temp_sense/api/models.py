@@ -36,50 +36,28 @@ class DeviceReading(models.Model):
         return f"{self.dev_eui}"
 
     @staticmethod
-    def get_all_device_health_since_date(since_date: date = utils.get_yesterday()):
-        device_health: list[tuple] = []
-        for device in DeviceData.objects.all():
-            readings = DeviceReading.objects.filter(
-                dev_eui_id=device, timestamp__gte=since_date
-            )
-            if readings.exists():
-                seconds_since_date = readings.aggregate(
-                    total_seconds=utils.get_current_time() - models.Min("timestamp")
-                )["total_seconds"]
-                seconds_since_date = (
-                    seconds_since_date.total_seconds() if seconds_since_date else 0
-                )
+    def get_all_device_health_since_date(
+        since_date: date = utils.get_yesterday(),
+    ) -> dict:
+        readings = DeviceReading.objects.filter(timestamp__gte=since_date)
+        if readings.exists():
+            actual_readings = {}
+            for reading in readings:
+                timestamp = reading.timestamp.strftime("%Y-%m-%d-%H")
+                dev_eui_id = DeviceData.objects.get(id=reading.dev_eui_id).__str__()
+                if dev_eui_id in actual_readings:
+                    if timestamp not in actual_readings[dev_eui_id]:
+                        actual_readings[dev_eui_id].append(timestamp)
+                else:
+                    actual_readings[dev_eui_id] = [timestamp]
 
-                actual_readings = [
-                    {
-                        "dev_eui_id": r["dev_eui_id"],
-                        "timestamp_till_hour": r["timestamp"].strftime("%Y-%m-%d-%H"),
-                    }
-                    for r in readings.values("dev_eui_id", "timestamp")
-                ]
-
-                actual_readings_report = {}
-                for reading in actual_readings:
-                    if reading["dev_eui_id"] in actual_readings_report:
-                        if (
-                            reading["timestamp_till_hour"]
-                            not in actual_readings_report[reading["dev_eui_id"]]
-                        ):
-                            actual_readings_report[reading["dev_eui_id"]].append(
-                                reading["timestamp_till_hour"]
-                            )
-                    else:
-                        actual_readings_report[reading["dev_eui_id"]] = [
-                            reading["timestamp_till_hour"]
-                        ]
-
-                possible_readings: float = round(seconds_since_date / 3600, 0)
-                health_value = round(
-                    len(actual_readings_report[device.id]) / possible_readings * 100, 0
-                )
-                device_health.append((device, health_value))
-
-        return device_health
+            possible_readings = (
+                utils.get_current_time() - since_date
+            ).total_seconds() // 3600  # one reading per hour
+            return {
+                k: round(len(v) / possible_readings * 100, 0)
+                for k, v in actual_readings.items()
+            }
 
 
 class DeviceData(models.Model):
@@ -99,7 +77,7 @@ class DeviceData(models.Model):
     @staticmethod
     def devices_without_readings_in_the_last_hour():
         return DeviceData.objects.exclude(
-            device_readings__timestamp__gte=utils.on_hour_ago()
+            device_readings__timestamp__gte=utils.one_hour_ago()
         ).distinct()
 
     class Meta:
