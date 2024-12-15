@@ -1,18 +1,15 @@
 import logging
 import sys
-from datetime import date, datetime, timedelta
+from datetime import date
 
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from . import chirpstack
+from . import chirpstack, utils
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-NOW = datetime.now()
-last_hour = datetime.now() - timedelta(hours=1)
 
 
 class DeviceReading(models.Model):
@@ -39,7 +36,7 @@ class DeviceReading(models.Model):
         return f"{self.dev_eui}"
 
     @staticmethod
-    def get_all_device_health_since_date(since_date: date):
+    def get_all_device_health_since_date(since_date: date = utils.get_yesterday()):
         device_health: list[tuple] = []
         for device in DeviceData.objects.all():
             readings = DeviceReading.objects.filter(
@@ -47,7 +44,7 @@ class DeviceReading(models.Model):
             )
             if readings.exists():
                 seconds_since_date = readings.aggregate(
-                    total_seconds=NOW - models.Min("timestamp")
+                    total_seconds=utils.get_current_time() - models.Min("timestamp")
                 )["total_seconds"]
                 seconds_since_date = (
                     seconds_since_date.total_seconds() if seconds_since_date else 0
@@ -102,7 +99,7 @@ class DeviceData(models.Model):
     @staticmethod
     def devices_without_readings_in_the_last_hour():
         return DeviceData.objects.exclude(
-            device_readings__timestamp__gte=last_hour
+            device_readings__timestamp__gte=utils.on_hour_ago()
         ).distinct()
 
     class Meta:

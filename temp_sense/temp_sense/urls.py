@@ -7,7 +7,6 @@ router = routers.DefaultRouter()
 router.register(r"readings", views.DeviceReadingViewSet, basename="reading")
 router.register(r"devices", views.DeviceDataViewSet, basename="device")
 
-
 urlpatterns = [
     path("api/", include(router.urls)),
     path("api/", include("api.urls")),
