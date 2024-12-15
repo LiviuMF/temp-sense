@@ -52,8 +52,12 @@ class DeviceReading(models.Model):
                     actual_readings[dev_eui_id] = [timestamp]
 
             possible_readings = (
-                utils.get_current_time() - since_date
-            ).total_seconds() // 3600  # one reading per hour
+                1
+                + (  # +1 is to take into account the readings of the current hour
+                    utils.get_current_time() - since_date
+                ).total_seconds()
+                // 3600
+            )  # one reading per hour
             return {
                 k: round(len(v) / possible_readings * 100, 0)
                 for k, v in actual_readings.items()
