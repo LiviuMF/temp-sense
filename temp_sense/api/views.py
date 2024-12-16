@@ -3,7 +3,7 @@ from datetime import datetime
 from django.http import HttpResponse, JsonResponse
 from rest_framework import viewsets
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 from . import utils
@@ -16,6 +16,7 @@ def index(request):
     return HttpResponse("Battlecruiser Operational")
 
 
+@api_view(["GET"])
 @permission_classes((IsAuthenticated, IsInAllowedGroup))
 def device_health(request):
     if request.method == "GET":
