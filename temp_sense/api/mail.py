@@ -125,7 +125,7 @@ def group_data_by_hour(temp_data: list[dict]) -> list[dict]:
     return results[-24:]
 
 
-def send_daily_notification() -> None:
+def send_daily_notification(to_owner: str = None) -> None:
     dev_owners = DeviceData.objects.all().values_list("dev_owner", flat=True).distinct()
 
     for owner in dev_owners:
@@ -162,5 +162,14 @@ def send_daily_notification() -> None:
             message_body="This is an email from Horepa.ro with hourly temperature",
             attachments=attachment_details,
         )
-        send_email(to_email=owner_details.dev_owner_email, message_body=message)
-        logger.info(f"Successfully sent email to {send_email}")
+        if to_owner and owner_details.dev_owner.lower() == to_owner:
+            send_email(
+                to_email=owner_details.dev_owner_email.split(","), message_body=message
+            )
+            logger.info(f"Successfully sent email to {owner_details.dev_owner}")
+            return
+
+        send_email(
+            to_email=owner_details.dev_owner_email.split(","), message_body=message
+        )
+        logger.info(f"Successfully sent email to {owner_details.dev_owner}")
