@@ -129,6 +129,8 @@ def send_daily_notification(to_owner: str = None) -> None:
     dev_owners = DeviceData.objects.all().values_list("dev_owner", flat=True).distinct()
 
     for owner in dev_owners:
+        if to_owner and not owner.lower() == to_owner:
+            continue
         attachment_details: list[tuple] = []
         owner_devices: list[DeviceData] = DeviceData.objects.filter(dev_owner=owner)
         for device in owner_devices:
@@ -162,12 +164,6 @@ def send_daily_notification(to_owner: str = None) -> None:
             message_body="This is an email from Horepa.ro with hourly temperature",
             attachments=attachment_details,
         )
-        if to_owner and owner_details.dev_owner.lower() == to_owner:
-            send_email(
-                to_email=owner_details.dev_owner_email.split(","), message_body=message
-            )
-            logger.info(f"Successfully sent email to {owner_details.dev_owner}")
-            return
 
         send_email(
             to_email=owner_details.dev_owner_email.split(","), message_body=message
