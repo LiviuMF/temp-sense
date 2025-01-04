@@ -73,7 +73,8 @@ class DeviceData(models.Model):
     dev_owner = models.CharField(max_length=100)
     dev_owner_email = models.CharField(max_length=200)
     dev_owner_address = models.CharField(max_length=100)
-    dev_temp_limit = models.CharField(max_length=10)
+    dev_normal_temp = models.CharField(max_length=10)
+    dev_max_accepted_temp = models.CharField(max_length=10)
 
     def clean(self, *args, **kwargs):
         self.dev_eui = str(self.dev_eui).lower()
