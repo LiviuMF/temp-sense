@@ -2,6 +2,7 @@ import logging
 import sys
 from datetime import date
 
+from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -83,7 +84,9 @@ class DeviceData(models.Model):
     @staticmethod
     def devices_without_readings_in_the_last_hour():
         return DeviceData.objects.exclude(
-            device_readings__timestamp__gte=utils.one_hour_ago()
+            device_readings__timestamp__gte=utils.minutes_ago(
+                settings.ONE_HOUR_AGO_WITH_ERROR
+            )
         ).distinct()
 
     class Meta:

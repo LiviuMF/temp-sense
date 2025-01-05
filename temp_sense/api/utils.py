@@ -9,5 +9,5 @@ def get_yesterday():
     return get_current_time().date() - timedelta(days=1)
 
 
-def one_hour_ago():
-    return get_current_time() - timedelta(hours=1)
+def minutes_ago(minutes: int) -> datetime:
+    return get_current_time() - timedelta(minutes=minutes)

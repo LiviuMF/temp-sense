@@ -86,7 +86,7 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",  # noqa
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
@@ -131,8 +131,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 100,
 }
 
 APPEND_SLASH = False
@@ -165,3 +165,5 @@ DISCORD_SEND_MESSAGE_URL = os.environ.get("DISCORD_SEND_MESSAGE_URL")
 DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
 
 API_PERMISSION_EXCEPTIONS = os.environ.get("API_PERMISSION_EXCEPTIONS")
+
+ONE_HOUR_AGO_WITH_ERROR = os.environ.get("ONE_HOUR_AGO_WITH_ERROR", 62)

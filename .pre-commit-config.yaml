@@ -20,7 +20,7 @@ repos:
             types: [python]
           - id: flake8
             name: flake8
-            entry: flake8 --max-line-length=88
+            entry: flake8 --max-line-length=88 --enable-extensions=nqa
             language: system
             types: [python]
           - id: isort
