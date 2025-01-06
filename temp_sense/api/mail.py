@@ -20,7 +20,7 @@ TZ_NOW = timezone.now().replace(microsecond=0, tzinfo=None)
 
 def plot_graph(plot_data: list[dict]) -> BytesIO:
     x_values = [p["time"] for p in plot_data]
-    y_values = [float(p["tempc_ds"]) for p in plot_data]
+    y_values = [p["tempc_ds"] for p in plot_data]
 
     plt.plot(x_values, y_values, color="#e5b75f", marker="o")
     plt.xticks([], [])  # remove x axis labels
@@ -56,7 +56,7 @@ def plot_report(
         )
         page.insert_text(
             (text_position[0] + 300, text_position[1]),
-            device["tempc_ds"],
+            str(device["tempc_ds"]),
             fontsize=12,
             color=(0, 0, 0),
         )
