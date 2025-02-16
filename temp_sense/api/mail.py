@@ -71,7 +71,7 @@ def build_message_body(
     to_email: str,
     subject: str,
     message_body: str,
-    attachments: list,
+    attachments: list = None,
     from_email: str = settings.OFFICE_EMAIL,
 ):
     msg = MIMEMultipart()
