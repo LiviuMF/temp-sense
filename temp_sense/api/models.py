@@ -74,7 +74,6 @@ class DeviceData(models.Model):
     dev_owner = models.CharField(max_length=100)
     dev_owner_email = models.CharField(max_length=200)
     dev_owner_address = models.CharField(max_length=100)
-    dev_normal_temp = models.FloatField()
     dev_max_accepted_temp = models.FloatField()
 
     def clean(self, *args, **kwargs):
