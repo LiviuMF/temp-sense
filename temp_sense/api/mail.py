@@ -4,6 +4,7 @@ from datetime import timedelta
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 from io import BytesIO
 
 import matplotlib.pyplot as plt
@@ -71,6 +72,7 @@ def build_message_body(
     to_email: str,
     subject: str,
     message_body: str,
+    to_html: bool = False,
     attachments: list = None,
     from_email: str = settings.OFFICE_EMAIL,
 ):
@@ -78,7 +80,17 @@ def build_message_body(
     msg["from"] = from_email
     msg["to"] = to_email
     msg["subject"] = subject
-    msg.attach(MIMEText(message_body, "plain"))
+
+    if not to_html:
+        msg.attach(MIMEText(message_body, "plain"))
+    else:
+        msg.attach(MIMEText(message_body, "html"))
+
+    img_data = open('api/media/lemongras.png', 'rb')
+    image = MIMEImage(img_data.read())  # img_data is a file-like object
+    image.add_header("Content-ID", "<image_cid>")  # Reference in HTML as cid:image_cid
+    image.add_header("Content-Disposition", "inline", filename="media/lemongras.png")  # Adjust filename if needed
+    msg.attach(image)
 
     if attachments:
         for table_pdf, device_data in attachments:

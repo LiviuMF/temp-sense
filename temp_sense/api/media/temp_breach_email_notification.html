@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature Breach Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .email-header {
+            text-align: center;
+        }
+        .email-header img {
+            width: 150px;
+        }
+        .email-body {
+            margin-top: 20px;
+        }
+        .email-body h2 {
+            color: #FF6347;
+        }
+        .details-table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+        .details-table th, .details-table td {
+            padding: 10px;
+            border: 1px solid #dddddd;
+            text-align: left;
+        }
+        .details-table th {
+            background-color: #f2f2f2;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #888888;
+        }
+    </style>
+</head>
+<body>
+
+<div class="email-container">
+    <div class="email-header">
+        <img src="cid:image_cid" alt="Company Logo">
+        <h1>Temperature Limit Breach Notification</h1>
+    </div>
+
+    <div class="email-body">
+        <h2>Attention: Temperature Breach Alert</h2>
+        <p>Hello <strong>{{client_name}}</strong>,</p>
+        <p>This is to notify you of a temperature breach for one of your devices. Below are the details:</p>
+
+        <table class="details-table">
+            <tr>
+                <th>Device Name</th>
+                <th>Latest temp. reading</th>
+                <th>Temperature Limit</th>
+            </tr>
+                {{temp_breach_devices}}
+        </table>
+
+        <p>Please check your equipment. For any assistance, feel free to contact us.</p>
+    </div>
+
+    <div class="footer">
+        <p><br> The <strong>Lemongras Tech</strong> Team</p>
+        <p>Hasdate 44 | 0744160704 | office@lemongras.ro</p>
+    </div>
+</div>
+
+</body>
+</html>
