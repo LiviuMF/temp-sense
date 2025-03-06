@@ -173,7 +173,7 @@ def send_daily_notification(to_owner: str = None) -> None:
         message = build_message_body(
             to_email=owner_details.dev_owner_email,
             subject=f"Hourly temperature for {owner_details.dev_owner}",
-            message_body="This is an email from Horepa.ro with hourly temperature",
+            message_body="This is an email from Lemongras.ro with hourly temperature",
             attachments=attachment_details,
         )
 

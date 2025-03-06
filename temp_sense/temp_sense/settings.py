@@ -147,8 +147,8 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 DAILY_EMAIL_SCHEDULED_HOUR = os.environ.get("DAILY_EMAIL_SCHEDULED_HOUR", 12)
-OFFICE_EMAIL = os.environ.get("OFFICE_EMAIL", "office@cohe.ro")
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp@cohe.ro")
+OFFICE_EMAIL = os.environ.get("OFFICE_EMAIL", "office@lemongras.ro")
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp@lemongras.ro")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
 EMAIL_HOST_USERNAME = os.environ.get("EMAIL_HOST_USERNAME")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
