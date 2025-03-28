@@ -83,9 +83,7 @@ class DeviceData(models.Model):
     @staticmethod
     def devices_without_readings_in_the_last_hour():
         return DeviceData.objects.exclude(
-            device_readings__timestamp__gte=utils.minutes_ago(
-                settings.ONE_HOUR_AGO_WITH_ERROR
-            )
+            device_readings__timestamp__gte=utils.minutes_ago(60)
         ).distinct()
 
     class Meta:
