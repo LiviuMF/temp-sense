@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     def handle(self, *args, **options):
         devs_with_temp_breach = DeviceReading.objects.filter(
-            timestamp__gte=utils.minutes_ago(settings.ONE_HOUR_AGO_WITH_ERROR + 60),
+            timestamp__gte=utils.minutes_ago(
+                settings.TEMP_BREACH_OBSERVATION_WINDOW
+            ),
             tempc_ds__gte=F("dev_eui__dev_max_accepted_temp")
         ).values_list(
             "dev_eui__dev_owner",
@@ -40,8 +42,9 @@ class Command(BaseCommand):
                         'data': [reading],
                     }
 
-        if dev_breach:
+        if len(dev_breach.items()) >= settings.MAX_READING_BREACHES:
             dev_and_owner = []
+            # TODO check this code for bugs
             for owner, data in dev_breach.items():
                 dev_and_owner.extend(['_'.join((d[0], d[2])) for d in data['data']])
                 devices = [d[2] for d in data['data']]
@@ -59,7 +62,7 @@ class Command(BaseCommand):
                     message_body=message
                 )
 
-            notification_message = "\n".join(dev_and_owner)
+            notification_message = "\n".join(set(dev_and_owner))
             discord.send_message(f"Temp limit breach >1/h on devices:" f"\n {notification_message}")
             logger.info("Successfully sent discord notification")
 

@@ -24,7 +24,10 @@ class DeviceDataAdmin(admin.ModelAdmin):
 
 
 class DeviceReadingAdmin(admin.ModelAdmin):
-    list_display = ("dev_eui", "timestamp")
+    list_display = ("dev_eui", "timestamp", 'tempc_ds')
+    list_filter = [
+        'dev_eui'
+    ]
     ordering = ("-id",)
 
 
