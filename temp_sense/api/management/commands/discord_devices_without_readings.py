@@ -12,9 +12,10 @@ def get_remaining_tokens_and_days():
             datetime.today() - DeviceReading.objects.order_by('id').first().timestamp
     ).days
     total_tokens_used = DeviceReading.objects.count() * settings.TOKEN_USAGE_PER_MESSAGE
+    token_consumption_per_day = settings.TOTAL_AVAILABLE_TOKENS / days_from_first_reading
+    days_left_of_tokens = settings.TOTAL_AVAILABLE_TOKENS / token_consumption_per_day - days_from_first_reading
+
     total_available_tokens = settings.TOTAL_AVAILABLE_TOKENS - total_tokens_used
-    token_consumption_per_day = total_available_tokens / days_from_first_reading
-    days_left_of_tokens = total_available_tokens / token_consumption_per_day
 
     return total_available_tokens, days_left_of_tokens
 
