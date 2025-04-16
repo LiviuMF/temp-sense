@@ -17,7 +17,7 @@ def get_remaining_tokens_and_days():
 
     total_available_tokens = settings.TOTAL_AVAILABLE_TOKENS - total_tokens_used
 
-    return total_available_tokens, days_left_of_tokens
+    return round(total_available_tokens, 0), round(days_left_of_tokens, 0)
 
 
 class Command(BaseCommand):
