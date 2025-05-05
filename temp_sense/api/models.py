@@ -2,7 +2,6 @@ import logging
 import sys
 from datetime import date
 
-from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -75,7 +74,12 @@ class DeviceData(models.Model):
     dev_owner_email = models.CharField(max_length=200)
     dev_owner_address = models.CharField(max_length=100)
     dev_max_accepted_temp = models.FloatField()
-
+    # dev_owner = models.ForeignKey(
+    #     "DeviceOwner",
+    #     on_delete=models.SET_NULL,
+    #     related_name="device_data",
+    #     null=True,
+    # )
     def clean(self, *args, **kwargs):
         self.dev_eui = str(self.dev_eui).lower()
         self.dev_join_eui = str(self.dev_join_eui).lower()
@@ -91,6 +95,16 @@ class DeviceData(models.Model):
 
     def __str__(self):
         return f"{self.dev_owner}_{self.dev_name}".upper()
+
+
+class DeviceOwner(models.Model):
+    name = models.CharField(max_length=20)
+    email = models.CharField(max_length=50)
+    address = models.CharField(max_length=100)
+    owner_legal_id = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
 
 
 @receiver(post_save, sender=DeviceData)

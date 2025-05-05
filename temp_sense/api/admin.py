@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import DeviceData, DeviceReading
+from .models import DeviceData, DeviceReading, DeviceOwner
 
 
 class DeviceDataAdmin(admin.ModelAdmin):
@@ -31,8 +31,14 @@ class DeviceReadingAdmin(admin.ModelAdmin):
     ordering = ("-id",)
 
 
+class DeviceOwnerAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    ordering = ('name',)
+
+
 admin.site.register(DeviceData, DeviceDataAdmin)
 admin.site.register(DeviceReading, DeviceReadingAdmin)
+admin.site.register(DeviceOwner, DeviceOwnerAdmin)
 admin.site.site_header = "LemonGrass Tech"
 admin.site.site_title = "Temperature sensors"
 admin.site.index_title = "Welcome to the device management portal"
