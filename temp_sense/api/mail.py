@@ -162,7 +162,7 @@ def send_daily_notification(to_owner: str = None) -> None:
                 pdf_table = plot_report(
                     data=sensor_data_clean,
                     client_name=owner,
-                    client_address=device.dev_owner_address,
+                    client_address=device.dev_owner.address,
                     device_name=device.dev_name,
                 )
                 attachment_details.append((pdf_table, device))

@@ -68,18 +68,14 @@ class DeviceData(models.Model):
     dev_eui = models.CharField(max_length=50, unique=True)
     dev_join_eui = models.CharField(max_length=50)
     dev_app_key = models.CharField(max_length=50)
-    dev_nwk_key = models.CharField(max_length=50, null=True, blank=True)
     dev_name = models.CharField(max_length=15)
-    dev_owner = models.CharField(max_length=100)
-    dev_owner_email = models.CharField(max_length=200)
-    dev_owner_address = models.CharField(max_length=100)
     dev_max_accepted_temp = models.FloatField()
-    # dev_owner = models.ForeignKey(
-    #     "DeviceOwner",
-    #     on_delete=models.SET_NULL,
-    #     related_name="device_data",
-    #     null=True,
-    # )
+    dev_owner = models.ForeignKey(
+        "DeviceOwner",
+        on_delete=models.SET_NULL,
+        related_name="device_data",
+        null=True,
+    )
     def clean(self, *args, **kwargs):
         self.dev_eui = str(self.dev_eui).lower()
         self.dev_join_eui = str(self.dev_join_eui).lower()
