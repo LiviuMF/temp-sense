@@ -171,13 +171,13 @@ def send_daily_notification(to_owner: str = None) -> None:
                 continue
         owner_details = DeviceData.objects.filter(dev_owner=owner).first()
         message = build_message_body(
-            to_email=owner_details.dev_owner_email,
+            to_email=owner_details.dev_owner.email,
             subject=f"Hourly temperature for {owner_details.dev_owner}",
             message_body="This is an email from Lemongras.ro with hourly temperature",
             attachments=attachment_details,
         )
 
         send_email(
-            to_email=owner_details.dev_owner_email.split(","), message_body=message
+            to_email=owner_details.dev_owner.email.split(","), message_body=message
         )
         logger.info(f"Successfully sent email to {owner_details.dev_owner}")

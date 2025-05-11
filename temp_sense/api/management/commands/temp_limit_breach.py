@@ -21,8 +21,8 @@ class Command(BaseCommand):
             ),
             tempc_ds__gte=F("dev_eui__dev_max_accepted_temp")
         ).values_list(
-            "dev_eui__dev_owner",
-            "dev_eui__dev_owner_email",
+            "dev_eui__dev_owner__name",
+            "dev_eui__dev_owner__email",
             "dev_eui__dev_name",
             "dev_eui__dev_max_accepted_temp",
             "tempc_ds",
