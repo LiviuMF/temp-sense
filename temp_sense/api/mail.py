@@ -37,6 +37,7 @@ def plot_report(
         client_name: str,
         client_address: str,
         device_name: str,
+        owner_legal_id: str,
 ):
     template_pdf = pymupdf.open("api/media/pdf_template.pdf")
 
@@ -168,6 +169,7 @@ def send_daily_notification(to_owner: str = None) -> None:
                     client_name=device.dev_owner.name,
                     client_address=device.dev_owner.address,
                     device_name=device.dev_name,
+                    owner_legal_id=device.dev_owner.owner_legal_id
                 )
                 attachment_details.append((pdf_table, device))
             else:
