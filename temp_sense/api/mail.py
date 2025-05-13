@@ -38,15 +38,17 @@ def plot_report(
         client_address: str,
         device_name: str,
         owner_legal_id: str,
+        owner_ansvsa: str,
 ):
     template_pdf = pymupdf.open("api/media/pdf_template.pdf")
 
     left_margin = 100
     page = template_pdf[0]
-    page.insert_text((left_margin, 115.5), f'{client_name}', fontsize=12, color=(0, 0, 0))
-    page.insert_text((left_margin, 136.5), f'N/A', fontsize=12, color=(0, 0, 0))
-    page.insert_text((left_margin, 157), f"{client_address}", fontsize=11, color=(0, 0, 0))
-    page.insert_text((left_margin, 203), f"{device_name}", fontsize=12, color=(0, 0, 0))
+    page.insert_text((left_margin, 115), f'{client_name}', fontsize=12, color=(0, 0, 0))
+    page.insert_text((left_margin, 134.5), f'{owner_legal_id}', fontsize=12, color=(0, 0, 0))
+    page.insert_text((left_margin, 152.5), f"{owner_ansvsa}", fontsize=11, color=(0, 0, 0))
+    page.insert_text((left_margin, 172), f"{client_address}", fontsize=11, color=(0, 0, 0))
+    page.insert_text((left_margin, 220.5), f"{device_name}", fontsize=12, color=(0, 0, 0))
 
     image_rect = pymupdf.Rect(260, -185, 560, 500)
     graph = plot_graph(data)
@@ -162,10 +164,11 @@ def send_daily_notification(to_owner: str = '') -> None:
             if sensor_data_clean:
                 pdf_table = plot_report(
                     data=sensor_data_clean,
-                    client_name=device.dev_owner.name,
-                    client_address=device.dev_owner.address,
+                    client_name=owner.name,
+                    client_address=owner.address,
                     device_name=device.dev_name,
-                    owner_legal_id=device.dev_owner.owner_legal_id
+                    owner_legal_id=owner.owner_legal_id,
+                    owner_ansvsa=owner.ansvsa
                 )
                 attachment_details.append((pdf_table, device))
             else:

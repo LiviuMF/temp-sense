@@ -98,6 +98,7 @@ class DeviceOwner(models.Model):
     email = models.CharField(max_length=50)
     address = models.CharField(max_length=100)
     owner_legal_id = models.CharField(max_length=20)
+    ansvsa = models.CharField(max_length=50, default='', null=True)
 
     def __str__(self):
         return self.name
