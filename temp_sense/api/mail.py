@@ -33,14 +33,17 @@ def plot_graph(plot_data: list[dict]) -> BytesIO:
 
 
 def plot_report(
-    data: list[dict], client_name: str, client_address: str, device_name: str
+        data: list[dict],
+        client_name: str,
+        client_address: str,
+        device_name: str,
 ):
     template_pdf = pymupdf.open("api/media/pdf_template.pdf")
 
     left_margin = 100
     page = template_pdf[0]
     page.insert_text((left_margin, 115.5), f'{client_name}', fontsize=12, color=(0, 0, 0))
-    page.insert_text((left_margin, 136.5), f'CJ24204878', fontsize=12, color=(0, 0, 0))
+    page.insert_text((left_margin, 136.5), f'N/A', fontsize=12, color=(0, 0, 0))
     page.insert_text((left_margin, 157), f"{client_address}", fontsize=11, color=(0, 0, 0))
     page.insert_text((left_margin, 203), f"{device_name}", fontsize=12, color=(0, 0, 0))
 
@@ -146,7 +149,7 @@ def send_daily_notification(to_owner: str = None) -> None:
             continue
         attachment_details: list[tuple] = []
         owner_devices: list[DeviceData] = DeviceData.objects.filter(dev_owner=owner)
-        for device in owner_devices:
+        for device in owner_devices[:1]:
             sensor_data = (
                 DeviceReading.objects.filter(
                     dev_eui=device, timestamp__gte=(TZ_NOW - timedelta(days=1))
