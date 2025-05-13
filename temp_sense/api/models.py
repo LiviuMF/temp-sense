@@ -69,6 +69,7 @@ class DeviceData(models.Model):
     dev_join_eui = models.CharField(max_length=50)
     dev_app_key = models.CharField(max_length=50)
     dev_name = models.CharField(max_length=15)
+    dev_location = models.CharField(max_length=40, default=None, null=True)
     dev_max_accepted_temp = models.FloatField()
     dev_owner = models.ForeignKey(
         "DeviceOwner",

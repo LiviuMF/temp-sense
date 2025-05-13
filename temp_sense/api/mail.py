@@ -37,18 +37,20 @@ def plot_report(
 ):
     template_pdf = pymupdf.open("api/media/pdf_template.pdf")
 
+    left_margin = 100
     page = template_pdf[0]
-    page.insert_text((50, 195), f'"{client_name}"', fontsize=12, color=(0, 0, 0))
-    page.insert_text((50, 210), f"{client_address}", fontsize=11, color=(0, 0, 0))
-    page.insert_text((216, 205), f"{device_name}", fontsize=12, color=(0, 0, 0))
+    page.insert_text((left_margin, 115.5), f'{client_name}', fontsize=12, color=(0, 0, 0))
+    page.insert_text((left_margin, 136.5), f'CJ24204878', fontsize=12, color=(0, 0, 0))
+    page.insert_text((left_margin, 157), f"{client_address}", fontsize=11, color=(0, 0, 0))
+    page.insert_text((left_margin, 203), f"{device_name}", fontsize=12, color=(0, 0, 0))
 
-    image_rect = pymupdf.Rect(260, -200, 560, 500)
+    image_rect = pymupdf.Rect(260, -185, 560, 500)
     graph = plot_graph(data)
     page.insert_image(image_rect, stream=graph.getvalue())
 
     row_height = 20.18
     for index, device in enumerate(data):
-        text_position = (80, 295 + (index * row_height))
+        text_position = (80, 330 + (index * row_height))
         page.insert_text(
             text_position,
             f"{device['date']}  {device['time'].time().replace(microsecond=0)}",
@@ -139,7 +141,6 @@ def group_data_by_hour(temp_data: list[dict]) -> list[dict]:
 
 def send_daily_notification(to_owner: str = None) -> None:
     dev_owners = DeviceData.objects.all().values_list("dev_owner", flat=True).distinct()
-
     for owner in dev_owners:
         if to_owner and not owner.lower() == to_owner:
             continue
@@ -161,7 +162,7 @@ def send_daily_notification(to_owner: str = None) -> None:
             if sensor_data_clean:
                 pdf_table = plot_report(
                     data=sensor_data_clean,
-                    client_name=owner,
+                    client_name=device.dev_owner.name,
                     client_address=device.dev_owner.address,
                     device_name=device.dev_name,
                 )
