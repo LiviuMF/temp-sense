@@ -12,7 +12,7 @@ import pymupdf
 from django.conf import settings
 from django.utils import timezone
 
-from .models import DeviceData, DeviceReading
+from .models import DeviceData, DeviceReading, DeviceOwner
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -143,14 +143,10 @@ def group_data_by_hour(temp_data: list[dict]) -> list[dict]:
     return results[-24:]
 
 
-def send_daily_notification(to_owner: str = None) -> None:
-    dev_owners = DeviceData.objects.all().values_list("dev_owner", flat=True).distinct()
-    for owner in dev_owners:
-        if to_owner and not owner.lower() == to_owner:
-            continue
+def send_daily_notification(to_owner: str = '') -> None:
+    for owner in DeviceOwner.objects.filter(name__icontains=to_owner):
         attachment_details: list[tuple] = []
-        owner_devices: list[DeviceData] = DeviceData.objects.filter(dev_owner=owner)
-        for device in owner_devices[:1]:
+        for device in owner.device_data.all():
             sensor_data = (
                 DeviceReading.objects.filter(
                     dev_eui=device, timestamp__gte=(TZ_NOW - timedelta(days=1))
