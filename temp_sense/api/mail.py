@@ -63,9 +63,14 @@ def plot_report(
             fontsize=12,
             color=(0, 0, 0),
         )
+
+        temperature_not_exceeding_max_set = device['tempc_ds']
+        if device['tempc_ds'] > device['max_temp']:
+            temperature_not_exceeding_max_set = device['max_temp']
+
         page.insert_text(
             (text_position[0] + 300, text_position[1]),
-            str(device["tempc_ds"]),
+            str(temperature_not_exceeding_max_set),
             fontsize=12,
             color=(0, 0, 0),
         )
@@ -140,6 +145,7 @@ def group_data_by_hour(temp_data: list[dict]) -> list[dict]:
                 "tempc_ds": d["tempc_ds"],
                 "time": d["timestamp"],
                 "date": d["timestamp"].date(),
+                "max_temp": d["dev_eui__dev_max_accepted_temp"],
             }
         )
     return results[-24:]
@@ -153,10 +159,10 @@ def send_daily_notification(to_owner: str = '') -> None:
                 DeviceReading.objects.filter(
                     dev_eui=device, timestamp__gte=(TZ_NOW - timedelta(days=1))
                 )
-                .values("tempc_ds", "timestamp")
+                .values("tempc_ds", "timestamp", "dev_eui__dev_max_accepted_temp")
                 .order_by("timestamp")
             )
-
+            
             # it's used to solve unsupported sqlite feature .distinct('value)
             # switch db to postgres
             sensor_data_clean = group_data_by_hour(sensor_data)
