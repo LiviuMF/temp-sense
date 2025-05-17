@@ -26,13 +26,15 @@ class Command(BaseCommand):
             "dev_eui__dev_name",
             "dev_eui__dev_max_accepted_temp",
             "tempc_ds",
+            "timestamp",
         ).order_by('-timestamp')
 
         dev_breach = {}
         for reading in devs_with_temp_breach:
-            owner, owner_email, dev_name, max_temp, recent_temp = reading
+            owner, owner_email, dev_name, max_temp, recent_temp, timestamp = reading
             if owner in dev_breach:
                 dev_breach[owner]['counter'] += 1
+                dev_breach[owner]['data'].append(reading)
                 if dev_name not in dev_breach[owner]['data'][-1][2]:
                     dev_breach[owner]['data'].append(reading)
             else:
@@ -41,9 +43,15 @@ class Command(BaseCommand):
                         'data': [reading],
                     }
 
-        if len(dev_breach.items()) >= settings.MAX_READING_BREACHES:
+        if (
+                (
+                    len(dev_breach.items()) == 1 and
+                    list(dev_breach.items())[0][1]['counter'] >= settings.MAX_READING_BREACHES
+                ) or
+                (len(dev_breach.items()) >= settings.MAX_READING_BREACHES)
+        ):
+
             dev_and_owner = []
-            # TODO check this code for bugs
             for owner, data in dev_breach.items():
                 dev_and_owner.extend(['_'.join((d[0], d[2])) for d in data['data']])
                 devices = [d[2] for d in data['data']]
@@ -72,8 +80,8 @@ class Command(BaseCommand):
 def build_html_message(dev_owner: str, devices: list):
     with open('api/media/temp_breach_email_notification.html', 'r') as html_file:
         device_datas = []
-        for owner, owner_email, dev_name, max_temp, recent_temp in devices:
-            device_tags = '<td>' + '</td><td>'.join((dev_name, str(recent_temp), str(max_temp))) + '</td>'
+        for owner, owner_email, dev_name, max_temp, recent_temp, timestamp in devices:
+            device_tags = '<td>' + '</td><td>'.join((dev_name, str(recent_temp), str(max_temp), str(timestamp))) + '</td>'
             device_datas.append(device_tags)
 
         html_text = html_file.read()
