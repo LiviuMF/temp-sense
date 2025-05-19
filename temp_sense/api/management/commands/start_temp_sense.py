@@ -20,7 +20,7 @@ class Command(BaseCommand):
         parser.add_argument('path')
         
     def handle(self, *args, **options):
-        response = requests.get('https://temp-sense.cohe.ro/')
+        response = requests.get('https://temp-sense.lemongras.ro/')
         if response.status_code != 200:
             try:
                 start_api(options['path'])

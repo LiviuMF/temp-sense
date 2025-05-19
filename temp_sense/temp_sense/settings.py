@@ -139,11 +139,11 @@ APPEND_SLASH = False
 
 
 CORS_ALLOWED_ORIGINS = [
-    "https://temp-sense.cohe.ro",
+    "https://temp-sense.lemongras.ro",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://temp-sense.cohe.ro",
+    "https://temp-sense.lemongras.ro",
 ]
 
 DAILY_EMAIL_SCHEDULED_HOUR = os.environ.get("DAILY_EMAIL_SCHEDULED_HOUR", 12)
