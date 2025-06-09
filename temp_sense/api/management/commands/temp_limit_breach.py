@@ -67,7 +67,7 @@ class Command(BaseCommand):
                     message_body=build_html_message(owner, data['data']),
                     to_html=True,
                 )
-                breakpoint()
+                
                 mail.send_email(
                     to_email=emails[0].split(','),
                     message_body=message
