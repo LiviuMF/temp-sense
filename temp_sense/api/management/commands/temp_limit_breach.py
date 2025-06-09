@@ -53,19 +53,23 @@ class Command(BaseCommand):
 
             dev_and_owner = []
             for owner, data in dev_breach.items():
-                dev_and_owner.extend(['_'.join((d[0], d[2])) for d in data['data']])
-                devices = [d[2] for d in data['data']]
-                emails = [d[1] for d in data['data']]
+                dev_and_owner.extend(
+                    [
+                        '_'.join(
+                            (owner,dev_name))
+                    for owner, emails, dev_name, max_temp, temp, timestamp in data['data']])
+                devices = [dev_name for owner, emails, dev_name, max_temp, temp, timestamp in data['data']]
+                emails = [emails for owner, emails, dev_name, max_temp, temp, timestamp in data['data']]
 
                 message = mail.build_message_body(
-                    to_email=','.join(emails),
+                    to_email=','.join(emails[0].split(',')),
                     subject=f"Temp limit breach {owner}: {','.join(devices)}",
                     message_body=build_html_message(owner, data['data']),
                     to_html=True,
                 )
-
+                breakpoint()
                 mail.send_email(
-                    to_email=emails,
+                    to_email=emails[0].split(','),
                     message_body=message
                 )
 
