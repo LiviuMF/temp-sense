@@ -96,7 +96,7 @@ class DeviceData(models.Model):
 
 class DeviceOwner(models.Model):
     name = models.CharField(max_length=20)
-    email = models.CharField(max_length=50)
+    email = models.CharField(max_length=100)
     address = models.CharField(max_length=100)
     owner_legal_id = models.CharField(max_length=20)
     ansvsa = models.CharField(max_length=50, default='', null=True)
