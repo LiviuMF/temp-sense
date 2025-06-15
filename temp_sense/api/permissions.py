@@ -18,7 +18,7 @@ class IsInAllowedGroup(permissions.BasePermission):
                 if (
                         any(group in allowed_groups for group in user_groups)
                         and view.get_view_name() == "Device Reading List"
-                ) and obj.email.lower() == username:
+                ):
                     return True
 
         return False
