@@ -39,7 +39,7 @@ class DeviceDataViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user_email = self.request.user.email
+        user_email = self.request.user.username
         queryset = self.queryset.filter(dev_owner__email__contains=user_email)
         return queryset
 
@@ -52,7 +52,7 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsInAllowedGroup]
 
     def get_queryset(self):
-        user_email = self.request.user.email
+        user_email = self.request.user.username
         queryset = self.queryset.filter(dev_eui__dev_owner__email__contains=user_email)
 
         param = self.request.query_params.get("dev_eui", None)
