@@ -36,7 +36,12 @@ class DeviceDataViewSet(viewsets.ModelViewSet):
     serializer_class = DeviceDataSerializer
 
     authentication_classes = [BasicAuthentication, SessionAuthentication]
-    permission_classes = [IsAuthenticated, IsInAllowedGroup]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user_email = self.request.user.email
+        queryset = self.queryset.filter(dev_owner__email__contains=user_email)
+        return queryset
 
 
 class DeviceReadingViewSet(viewsets.ModelViewSet):
@@ -47,7 +52,8 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsInAllowedGroup]
 
     def get_queryset(self):
-        queryset = self.queryset
+        user_email = self.request.user.email
+        queryset = self.queryset.filter(dev_eui__dev_owner__email__contains=user_email)
 
         param = self.request.query_params.get("dev_eui", None)
         if param:
