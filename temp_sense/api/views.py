@@ -55,9 +55,19 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
         user_email = self.request.user.username
         queryset = self.queryset.filter(dev_eui__dev_owner__email__contains=user_email)
 
-        param = self.request.query_params.get("dev_eui", None)
-        if param:
-            dev_eui = param.lower()
-            device = DeviceData.objects.get(dev_eui=dev_eui)
+        if all(
+                param in self.request.query_params
+                for param in ['start_date', 'end_date']
+        ):
+            start_date = self.request.query_params['start_date']
+            end_date = self.request.query_params['end_date']
+            queryset = self.queryset.filter(
+                dev_eui__dev_owner__email__contains=user_email,
+                timestamp__gte=datetime.strptime(start_date, "%Y-%m-%d"),
+                timestamp__lte=datetime.strptime(end_date, "%Y-%m-%d"),
+            )
+
+        if dev_eui := self.request.query_params.get("dev_eui", None):
+            device = DeviceData.objects.get(dev_eui=dev_eui.lower())
             queryset = queryset.filter(dev_eui=device)
         return queryset
