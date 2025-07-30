@@ -5,6 +5,7 @@ from rest_framework import viewsets
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 
 from . import utils
 from .models import DeviceData, DeviceReading
@@ -14,6 +15,17 @@ from .serializers import DeviceDataSerializer, DeviceReadingSerializer
 
 def index(request):
     return HttpResponse("Battlecruiser Operational")
+
+
+class LoginView(APIView):
+    authentication_classes = [BasicAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        return HttpResponse(
+            'Authentication successful',
+            status=200
+        )
 
 
 @api_view(["GET"])

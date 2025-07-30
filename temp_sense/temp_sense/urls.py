@@ -9,6 +9,7 @@ router.register(r"devices", views.DeviceDataViewSet, basename="device")
 
 urlpatterns = [
     path("api/", include(router.urls)),
+    path("login/", views.LoginView.as_view()),
     path('', views.index),
     path("admin", admin.site.urls),
 ]
