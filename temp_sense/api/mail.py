@@ -158,46 +158,46 @@ def send_daily_notification(to_owner: str = '') -> None:
             device_readings__timestamp__gte=(TZ_NOW - timedelta(days=1))
         )
         if not owner_devices_with_readings:
-            print('No readings in the past 24h from any device')
-            return
+            print(f'No readings in the past 24h from any device for owner {owner.name}')
+            pass
+        else:
+            for device in set(owner_devices_with_readings):
+                sensor_data = (
+                    DeviceReading.objects.filter(
+                        dev_eui=device,
+                        timestamp__gte=(TZ_NOW - timedelta(days=1))
+                    ).values(
+                        "tempc_ds",
+                        "timestamp",
+                        "dev_eui__dev_max_accepted_temp"
+                    ).order_by("-timestamp")
+                )
 
-        for device in set(owner_devices_with_readings):
-            sensor_data = (
-                DeviceReading.objects.filter(
-                    dev_eui=device,
-                    timestamp__gte=(TZ_NOW - timedelta(days=1))
-                ).values(
-                    "tempc_ds",
-                    "timestamp",
-                    "dev_eui__dev_max_accepted_temp"
-                ).order_by("-timestamp")
+                if not sensor_data:
+                    print(f"Device {device.dev_eui} has not sent any data yet")
+                    return
+
+                # it's used to solve unsupported sqlite feature .distinct('value)
+                # switch db to postgres
+                sensor_data_clean = group_data_by_hour(sensor_data)
+                pdf_table = plot_report(
+                    data=sensor_data_clean,
+                    client_name=owner.name,
+                    client_address=owner.address,
+                    device_name=device.dev_name,
+                    owner_legal_id=owner.owner_legal_id,
+                    owner_ansvsa=owner.ansvsa
+                )
+                attachment_details.append((pdf_table, device))
+
+            message = build_message_body(
+                to_email=owner.email,
+                subject=f"Hourly temperature for {owner.name}",
+                message_body="This is an email from Lemongras.ro with hourly temperature",
+                attachments=attachment_details,
             )
 
-            if not sensor_data:
-                print(f"Device {device.dev_eui} has not sent any data yet")
-                return
-
-            # it's used to solve unsupported sqlite feature .distinct('value)
-            # switch db to postgres
-            sensor_data_clean = group_data_by_hour(sensor_data)
-            pdf_table = plot_report(
-                data=sensor_data_clean,
-                client_name=owner.name,
-                client_address=owner.address,
-                device_name=device.dev_name,
-                owner_legal_id=owner.owner_legal_id,
-                owner_ansvsa=owner.ansvsa
+            send_email(
+                to_email=owner.email.split(","), message_body=message
             )
-            attachment_details.append((pdf_table, device))
-
-        message = build_message_body(
-            to_email=owner.email,
-            subject=f"Hourly temperature for {owner.name}",
-            message_body="This is an email from Lemongras.ro with hourly temperature",
-            attachments=attachment_details,
-        )
-
-        send_email(
-            to_email=owner.email.split(","), message_body=message
-        )
-        logger.info(f"Successfully sent email to {owner.name}")
+            logger.info(f"Successfully sent email to {owner.name}")

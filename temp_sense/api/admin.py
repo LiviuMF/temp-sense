@@ -13,7 +13,7 @@ class DeviceDataAdmin(admin.ModelAdmin):
                 DeviceReading.objects.filter(dev_eui=device_data_obj)
                 .order_by("-timestamp")
                 .first()
-                .timestamp.strftime("%H:%M")
+                .timestamp.strftime("%H:%M, %d-%m-%Y")
             )
             return format_html(
                 '<span style="color: red; font-weight: bold;">{}</span>',
