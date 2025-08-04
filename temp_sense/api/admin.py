@@ -8,7 +8,9 @@ class DeviceDataAdmin(admin.ModelAdmin):
     list_display = ("dev_owner", "dev_name", "no_readings")
 
     def no_readings(self, device_data_obj):
-        if device_data_obj in DeviceData.devices_without_readings_in_the_last_hour():
+        if (device_data_obj.device_readings.all() and
+                device_data_obj in DeviceData.devices_without_readings_in_the_last_hour()
+        ):
             latest_reading = (
                 DeviceReading.objects.filter(dev_eui=device_data_obj)
                 .order_by("-timestamp")
