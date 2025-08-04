@@ -65,10 +65,10 @@ class DeviceReading(models.Model):
 
 
 class DeviceData(models.Model):
-    dev_eui = models.CharField(max_length=50, unique=True)
-    dev_join_eui = models.CharField(max_length=50)
-    dev_app_key = models.CharField(max_length=50)
-    dev_nwk_key = models.CharField(max_length=50, null=True, default='')
+    dev_eui = models.CharField(max_length=50, unique=True, help_text='deveui')
+    dev_join_eui = models.CharField(max_length=50, help_text='appeui')
+    dev_app_key = models.CharField(max_length=50, help_text='appskey')
+    dev_nwk_key = models.CharField(max_length=50, null=True, default='', help_text='nwkskey')
     dev_name = models.CharField(max_length=15)
     dev_max_accepted_temp = models.FloatField()
     dev_owner = models.ForeignKey(
