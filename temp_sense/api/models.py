@@ -1,12 +1,14 @@
+from datetime import date
+import json
 import logging
 import sys
-from datetime import date
 
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from . import chirpstack, utils
+
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -67,7 +69,7 @@ class DeviceReading(models.Model):
 class DeviceData(models.Model):
     dev_eui = models.CharField(max_length=50, unique=True, help_text='deveui')
     dev_join_eui = models.CharField(max_length=50, help_text='appeui')
-    dev_app_key = models.CharField(max_length=50, help_text='appskey')
+    dev_app_key = models.CharField(max_length=50, help_text='appkey10')
     dev_nwk_key = models.CharField(max_length=50, null=True, default='', help_text='nwkskey')
     dev_name = models.CharField(max_length=15)
     dev_max_accepted_temp = models.FloatField()
@@ -121,3 +123,47 @@ def create_chirpstack_entity(sender, instance, created, **kwargs):
             dev_nwk_key=instance.dev_nwk_key,
         )
         logger.info("Registered chirpstack entity")
+
+
+class BulkDeviceUpload(models.Model):
+    owner = models.CharField(
+        choices=[
+            (v[0], v[0].upper())
+            for v in DeviceOwner.objects.all().values_list('name')
+        ],
+        max_length=100,
+        default=''
+    )
+    dev_name_prefix = models.CharField(max_length=20, default='LGT')
+    upload_file = models.FileField(upload_to='uploads')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.owner}'
+
+
+@receiver(post_save, sender=BulkDeviceUpload)
+def process_bulk_upload(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    all_dev_names = DeviceData.objects.all().values_list('dev_name')
+    with instance.upload_file as f:
+        json_reader = json.loads(f.read())
+        for index, device in enumerate(json_reader[
+            "partner"][0]["sale_order"][-1]["delivery"][0]['item'
+        ]):
+            if device['lora_deveui'].lower() not in all_dev_names:
+                owner = DeviceOwner.objects.filter(name=instance.owner).first()
+                dev_object = DeviceData(
+                        dev_eui=device['lora_deveui'],
+                        dev_join_eui=device['lora_appeui'],
+                        dev_app_key=device['lora_appkey10'],
+                        dev_nwk_key=device['lora_nwkskey'],
+                        dev_name=f'{instance.dev_name_prefix}_{index}',
+                        dev_max_accepted_temp=0,
+                        dev_owner=owner,
+                    )
+
+                dev_object.save()
+        instance.upload_file.delete(save=False)

@@ -1,7 +1,12 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import DeviceData, DeviceReading, DeviceOwner
+from .models import (
+    DeviceData,
+    DeviceReading,
+    DeviceOwner,
+    BulkDeviceUpload,
+)
 
 
 class DeviceDataAdmin(admin.ModelAdmin):
@@ -38,9 +43,15 @@ class DeviceOwnerAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
 
+class BulkDeviceUploadAdmin(admin.ModelAdmin):
+    list_display = ('created_at', )
+
+
 admin.site.register(DeviceData, DeviceDataAdmin)
 admin.site.register(DeviceReading, DeviceReadingAdmin)
 admin.site.register(DeviceOwner, DeviceOwnerAdmin)
+admin.site.register(BulkDeviceUpload, BulkDeviceUploadAdmin)
+
 admin.site.site_header = "LemonGrass Tech"
 admin.site.site_title = "Temperature sensors"
 admin.site.index_title = "Welcome to the device management portal"
