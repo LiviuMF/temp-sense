@@ -64,15 +64,17 @@ def plot_report(
             color=(0, 0, 0),
         )
 
+        color=(0, 0, 0)
         temperature_not_exceeding_max_set = device['tempc_ds']
         if device['tempc_ds'] > device['max_temp']:
             temperature_not_exceeding_max_set = device['max_temp']
+            color = (0.8, 0, 0)
 
         page.insert_text(
             (text_position[0] + 300, text_position[1]),
             str(temperature_not_exceeding_max_set),
             fontsize=12,
-            color=(0, 0, 0),
+            color=color,
         )
 
     report_buffer = BytesIO()
@@ -152,6 +154,7 @@ def group_data_by_hour(temp_data: list[dict]) -> list[dict]:
 
 
 def send_daily_notification(to_owner: str = '') -> None:
+    # if to_owner is empty string, filter will return all owners
     for owner in DeviceOwner.objects.filter(name__icontains=to_owner):
         attachment_details: list[tuple] = []
         owner_devices_with_readings = owner.device_data.all().filter(
