@@ -103,7 +103,7 @@ def build_message_body(
     image = MIMEImage(img_data.read())  # img_data is a file-like object
     image.add_header("Content-ID", "<image_cid>")  # Reference in HTML as cid:image_cid
     image.add_header("Content-Disposition", "inline", filename="media/lemongras.png")  # Adjust filename if needed
-    msg.attach(image)
+    img_data.close()
 
     if attachments:
         for table_pdf, device_data in attachments:
@@ -192,8 +192,8 @@ def send_daily_notification(to_owner: str = '') -> None:
 
             message = build_message_body(
                 to_email=owner.email,
-                subject=f"Hourly temperature for {owner.name}",
-                message_body="This is an email from Lemongras.ro with hourly temperature",
+                subject=f"Daily temperature report for {owner.name}",
+                message_body="This is an email from Lemongras.ro with the daily temperature report",
                 attachments=attachment_details,
             )
 
