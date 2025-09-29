@@ -6,6 +6,7 @@ from .models import (
     DeviceReading,
     DeviceOwner,
     BulkDeviceUpload,
+    HACCPReport,
 )
 
 
@@ -47,10 +48,19 @@ class BulkDeviceUploadAdmin(admin.ModelAdmin):
     list_display = ('created_at', )
 
 
+class HACCPReportAdmin(admin.ModelAdmin):
+    list_display = ('device', 'date',)
+    list_filter = [
+        'device'
+    ]
+
+
 admin.site.register(DeviceData, DeviceDataAdmin)
 admin.site.register(DeviceReading, DeviceReadingAdmin)
 admin.site.register(DeviceOwner, DeviceOwnerAdmin)
 admin.site.register(BulkDeviceUpload, BulkDeviceUploadAdmin)
+admin.site.register(HACCPReport, HACCPReportAdmin)
+
 
 admin.site.site_header = "LemonGrass Tech"
 admin.site.site_title = "Temperature sensors"

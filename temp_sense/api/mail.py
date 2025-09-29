@@ -65,14 +65,12 @@ def plot_report(
         )
 
         color=(0, 0, 0)
-        temperature_not_exceeding_max_set = device['tempc_ds']
         if device['tempc_ds'] > device['max_temp']:
-            temperature_not_exceeding_max_set = device['max_temp']
             color = (0.8, 0, 0)
 
         page.insert_text(
             (text_position[0] + 300, text_position[1]),
-            str(temperature_not_exceeding_max_set),
+            str(device['tempc_ds']),
             fontsize=12,
             color=color,
         )

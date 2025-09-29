@@ -107,6 +107,23 @@ class DeviceOwner(models.Model):
         return self.name
 
 
+class HACCPReport(models.Model):
+    device = models.ForeignKey(
+        DeviceData,
+        on_delete=models.SET_NULL,
+        related_name="report",
+        null=True
+    )
+    date = models.DateField()
+    report_data = models.JSONField(default=dict)
+
+    def __str__(self):
+        return f'{self.device.dev_name}_{self.date.isoformat()}'
+
+    class Meta:
+        ordering = ['-date']
+
+
 @receiver(post_save, sender=DeviceData)
 def create_chirpstack_entity(sender, instance, created, **kwargs):
     if created:

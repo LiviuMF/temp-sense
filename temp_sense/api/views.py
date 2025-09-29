@@ -8,9 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from . import utils
-from .models import DeviceData, DeviceReading
+from .models import DeviceData, DeviceReading, HACCPReport
 from .permissions import IsInAllowedGroup
-from .serializers import DeviceDataSerializer, DeviceReadingSerializer
+from .serializers import DeviceDataSerializer, DeviceReadingSerializer, HACCPReportSerializer
 
 
 def index(request):
@@ -82,4 +82,23 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
         if dev_eui := self.request.query_params.get("dev_eui", None):
             device = DeviceData.objects.get(dev_eui=dev_eui.lower())
             queryset = queryset.filter(dev_eui=device)
+        return queryset
+
+
+class HACCPReportViewSet(viewsets.ModelViewSet):
+    queryset = HACCPReport.objects.all()
+    serializer_class = HACCPReportSerializer
+
+    authentication_classes = [BasicAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated, IsInAllowedGroup]
+
+    def get_queryset(self):
+        if (
+                (dev_eui := self.request.query_params.get("dev_eui")) and
+                (report_date := self.request.query_params.get('report_date'))
+        ):
+            queryset = self.queryset.filter(
+                device=dev_eui.lower(),
+                date=report_date
+            )
         return queryset
