@@ -17,7 +17,6 @@ class IsInAllowedGroup(permissions.BasePermission):
                 user_groups = request.user.groups.values_list("name", flat=True)
                 if (
                         any(group in allowed_groups for group in user_groups)
-                        and view.get_view_name() == "Device Reading List"
                 ):
                     return True
 
