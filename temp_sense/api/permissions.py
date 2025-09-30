@@ -10,14 +10,13 @@ class IsInAllowedGroup(permissions.BasePermission):
         if username in settings.API_PERMISSION_EXCEPTIONS:
             return True
 
-        if request.method == "GET":
-            allowed_groups = ["api"]
-            obj = DeviceOwner.objects.filter(email__contains=username).first()
-            if obj:
-                user_groups = request.user.groups.values_list("name", flat=True)
-                if (
-                        any(group in allowed_groups for group in user_groups)
-                ):
-                    return True
+        allowed_groups = ["api"]
+        obj = DeviceOwner.objects.filter(email__contains=username).first()
+        if obj:
+            user_groups = request.user.groups.values_list("name", flat=True)
+            if (
+                    any(group in allowed_groups for group in user_groups)
+            ):
+                return True
 
         return False
