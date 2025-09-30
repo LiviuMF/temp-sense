@@ -101,4 +101,4 @@ class HACCPReportViewSet(viewsets.ModelViewSet):
                 device=dev_eui.lower(),
                 date=report_date
             )
-        return queryset
+            return queryset
