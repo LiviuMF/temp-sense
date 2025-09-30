@@ -94,15 +94,18 @@ class HACCPReportViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsInAllowedGroup]
 
     def get_queryset(self):
-        if (
-                (dev_eui := self.request.query_params.get("dev_eui")) and
-                (report_date := self.request.query_params.get('report_date'))
-        ):
-            queryset = self.queryset.filter(
+        dev_eui = self.request.query_params.get("dev_eui")
+        report_date = self.request.query_params.get('report_date')
+
+        if dev_eui and report_date:
+            return self.queryset.filter(
                 device=dev_eui.lower(),
                 date=report_date
             )
-            return queryset
+        elif dev_eui and not report_date:
+            return self.queryset.filter(
+                device=dev_eui.lower(),
+            )
         else:
             raise ValidationError(
                 "Missing required parameters: dev_eui and/or report_date"
