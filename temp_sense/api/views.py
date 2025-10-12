@@ -13,7 +13,12 @@ from rest_framework.views import APIView
 from . import utils
 from .models import DeviceData, DeviceReading, HACCPReport
 from .permissions import IsInAllowedGroup
-from .serializers import DeviceDataSerializer, DeviceReadingSerializer, HACCPReportSerializer
+from .serializers import (
+    DeviceDataSerializer,
+    DeviceReadingSerializer,
+    DeviceReadingUserSerializer,
+    HACCPReportSerializer
+)
 
 
 def index(request):
@@ -77,12 +82,16 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
 
         # one day filter
         if filter_date := self.request.query_params.get('date'):
+            self.serializer_class = DeviceReadingUserSerializer
             queryset = self.queryset.annotate(
                 date_only=TruncDate('timestamp')
             ).filter(
                 dev_eui__dev_owner__email__contains=user_email,
                 date_only=filter_date
+            ).annotate(
+                user_data=JSONObject(**user_data)
             )
+            return queryset
 
         # interval filter
         if all(
@@ -101,8 +110,6 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
             device = DeviceData.objects.get(dev_eui=dev_eui.lower())
             queryset = queryset.filter(dev_eui=device)
 
-        # add user data to queryset
-        queryset = queryset.annotate(user_data=JSONObject(**user_data))
         return queryset
 
 

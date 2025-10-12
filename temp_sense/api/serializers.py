@@ -14,7 +14,7 @@ class DeviceDataSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class DeviceReadingSerializer(serializers.ModelSerializer):
+class DeviceReadingUserSerializer(serializers.ModelSerializer):
     user_data = serializers.JSONField(read_only=True)
     class Meta:
         model = DeviceReading
@@ -24,6 +24,15 @@ class DeviceReadingSerializer(serializers.ModelSerializer):
             DeviceReading._meta.get_fields()
         ]
         fields = all_model_fields + ['user_data']
+
+    def to_internal_value(self, data):
+        return process_payload(data)
+
+
+class DeviceReadingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeviceReading
+        fields = '__all__'
 
     def to_internal_value(self, data):
         return process_payload(data)
