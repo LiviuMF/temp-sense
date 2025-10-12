@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from django.http import HttpResponse, JsonResponse
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDate, JSONObject
+from django.db.models import Value
 from rest_framework import viewsets
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.decorators import api_view, permission_classes
@@ -67,8 +68,13 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user_email = self.request.user.username
+        user_data = {
+            "email": Value(self.request.user.username),
+            "first_name": Value(self.request.user.first_name),
+            'last_name': Value(self.request.user.last_name)
+        }
         queryset = self.queryset.filter(dev_eui__dev_owner__email__contains=user_email)
-        
+
         # one day filter
         if filter_date := self.request.query_params.get('date'):
             queryset = self.queryset.annotate(
@@ -94,6 +100,9 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
         if dev_eui := self.request.query_params.get("dev_eui", None):
             device = DeviceData.objects.get(dev_eui=dev_eui.lower())
             queryset = queryset.filter(dev_eui=device)
+
+        # add user data to queryset
+        queryset = queryset.annotate(user_data=JSONObject(**user_data))
         return queryset
 
 
