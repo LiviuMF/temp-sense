@@ -81,13 +81,17 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
         queryset = self.queryset.filter(dev_eui__dev_owner__email__contains=user_email)
 
         # one day filter
-        if filter_date := self.request.query_params.get('date'):
+        if (
+                (filter_date := self.request.query_params.get('date')) and
+                (dev_eui := self.request.query_params.get('dev_eui'))
+        ):
             self.serializer_class = DeviceReadingUserSerializer
             queryset = self.queryset.annotate(
-                date_only=TruncDate('timestamp')
+                filter_date=TruncDate('timestamp')
             ).filter(
                 dev_eui__dev_owner__email__contains=user_email,
-                date_only=filter_date
+                filter_date=filter_date,
+                dev_eui=dev_eui
             ).annotate(
                 user_data=JSONObject(**user_data)
             )
@@ -105,11 +109,6 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
                 timestamp__gte=datetime.strptime(start_date, "%Y-%m-%d"),
                 timestamp__lte=datetime.strptime(end_date, "%Y-%m-%d"),
             )
-
-        if dev_eui := self.request.query_params.get("dev_eui", None):
-            device = DeviceData.objects.get(dev_eui=dev_eui.lower())
-            queryset = queryset.filter(dev_eui=device)
-
         return queryset
 
 
