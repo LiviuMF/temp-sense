@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from .models import DeviceData
 
 
-def process_payload(payload: dict) -> dict:
+def process_readings_payload(payload: dict) -> dict:
     device_data_instance = DeviceData.objects.get(
         dev_eui=payload["deviceInfo"]["devEui"]
     )
@@ -16,6 +16,21 @@ def process_payload(payload: dict) -> dict:
         }
     )
     return {k.lower(): v for k, v in cleaned_data.items()}
+
+
+def process_device_payload(payload: dict) -> dict:
+    temp_interval = (
+        payload.getlist('temp_interval')
+        if hasattr(payload, 'getlist')
+        else payload.get('temp_interval')
+    )
+    if temp_interval:
+        min_temp, max_temp = temp_interval
+        return {
+                'dev_max_accepted_temp': float(max_temp),
+                'dev_min_accepted_temp': float(min_temp)
+            }
+    return {}
 
 
 def convert_timestamp_to_current_tz(timestamp: str) -> datetime:

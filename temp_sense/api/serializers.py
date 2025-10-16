@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .data_cleaner import process_payload
+from .data_cleaner import process_readings_payload, process_device_payload
 from .models import (
     DeviceData,
     DeviceReading,
@@ -12,6 +12,12 @@ class DeviceDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeviceData
         fields = "__all__"
+
+    def to_internal_value(self, data):
+        internal = super().to_internal_value(data)
+        internal.update(process_device_payload(data))
+
+        return internal
 
 
 class DeviceReadingUserSerializer(serializers.ModelSerializer):
@@ -26,7 +32,7 @@ class DeviceReadingUserSerializer(serializers.ModelSerializer):
         fields = all_model_fields + ['user_data']
 
     def to_internal_value(self, data):
-        return process_payload(data)
+        return process_readings_payload(data)
 
 
 class DeviceReadingSerializer(serializers.ModelSerializer):
@@ -35,7 +41,7 @@ class DeviceReadingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_internal_value(self, data):
-        return process_payload(data)
+        return process_readings_payload(data)
 
 
 class HACCPReportSerializer(serializers.ModelSerializer):
