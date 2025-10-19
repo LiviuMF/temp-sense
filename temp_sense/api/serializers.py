@@ -5,6 +5,7 @@ from .models import (
     DeviceData,
     DeviceReading,
     HACCPReport,
+    DeviceOwner
 )
 
 
@@ -47,4 +48,10 @@ class DeviceReadingSerializer(serializers.ModelSerializer):
 class HACCPReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = HACCPReport
+        fields = "__all__"
+
+
+class DeviceOwnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeviceOwner
         fields = "__all__"

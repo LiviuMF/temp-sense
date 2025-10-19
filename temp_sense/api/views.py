@@ -11,12 +11,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from . import utils
-from .models import DeviceData, DeviceReading, HACCPReport
+from .models import DeviceData, DeviceReading, DeviceOwner, HACCPReport
 from .permissions import IsInAllowedGroup
 from .serializers import (
     DeviceDataSerializer,
     DeviceReadingSerializer,
     DeviceReadingUserSerializer,
+    DeviceOwnerSerializer,
     HACCPReportSerializer
 )
 
@@ -109,6 +110,19 @@ class DeviceReadingViewSet(viewsets.ModelViewSet):
                 timestamp__gte=datetime.strptime(start_date, "%Y-%m-%d"),
                 timestamp__lte=datetime.strptime(end_date, "%Y-%m-%d"),
             )
+        return queryset
+
+
+class DeviceOwnerViewSet(viewsets.ModelViewSet):
+    queryset = DeviceOwner.objects.all()
+    serializer_class = DeviceOwnerSerializer
+
+    authentication_classes = [BasicAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user_email = self.request.user.username
+        queryset = self.queryset.filter(email__contains=user_email)
         return queryset
 
 
