@@ -45,7 +45,7 @@ class DeviceReadingAdmin(admin.ModelAdmin):
 
 
 class DeviceOwnerAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name', 'email')
     ordering = ('name',)
 
 
