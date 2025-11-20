@@ -11,7 +11,7 @@ from .models import (
 
 
 class DeviceDataAdmin(admin.ModelAdmin):
-    list_display = ("dev_owner", "dev_name", "no_readings")
+    list_display = ("dev_name", "dev_eui", "dev_owner", "no_readings")
 
     def no_readings(self, device_data_obj):
         if (device_data_obj.device_readings.all() and
@@ -26,6 +26,11 @@ class DeviceDataAdmin(admin.ModelAdmin):
             return format_html(
                 '<span style="color: red; font-weight: bold;">{}</span>',
                 f"No readings in the last hour, latest reading at: {latest_reading}",
+            )
+        if not device_data_obj.device_readings.all():
+            return format_html(
+                '<span style="color: red; font-weight: bold;">{}</span>',
+                f"This sensor does not have any readings yet",
             )
 
     no_readings.short_description = "No Readings"

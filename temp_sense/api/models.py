@@ -174,10 +174,10 @@ def process_bulk_upload(sender, instance, created, **kwargs):
             if device['lora_deveui'].lower() not in all_dev_names:
                 owner = DeviceOwner.objects.filter(name=instance.owner).first()
                 dev_object = DeviceData(
-                        dev_eui=device['lora_deveui'],
-                        dev_join_eui=device['lora_appeui'],
-                        dev_app_key=device['lora_appkey10'],
-                        dev_nwk_key=device['lora_nwkskey'],
+                        dev_eui=device['lora_deveui'].lower(),
+                        dev_join_eui=device['lora_appeui'].lower(),
+                        dev_app_key=device['lora_appkey10'].lower(),
+                        dev_nwk_key=device['lora_nwkskey'].lower(),
                         dev_name=f'{instance.dev_name_prefix}_{index}',
                         dev_max_accepted_temp=0,
                         dev_owner=owner,
