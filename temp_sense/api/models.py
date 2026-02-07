@@ -80,6 +80,7 @@ class DeviceData(models.Model):
         related_name="device_data",
         null=True,
     )
+    dev_stop_notification_until = models.DateTimeField()
     def clean(self, *args, **kwargs):
         self.dev_eui = str(self.dev_eui).lower()
         self.dev_join_eui = str(self.dev_join_eui).lower()

@@ -7,7 +7,7 @@ from api.models import DeviceReading
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db.models import F, Count
+from django.db.models import F
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,19 +19,21 @@ class Command(BaseCommand):
             timestamp__gte=utils.minutes_ago(
                 settings.TEMP_BREACH_OBSERVATION_WINDOW
             ),
-            tempc_ds__gte=F("dev_eui__dev_max_accepted_temp")
+            tempc_ds__gte=F("dev_eui__dev_max_accepted_temp"),
+            dev_eui__dev_stop_notification_until__lte=utils.get_current_time()
         ).values_list(
             "dev_eui__dev_owner__name",
             "dev_eui__dev_owner__email",
             "dev_eui__dev_name",
             "dev_eui__dev_max_accepted_temp",
+            "dev_eui__dev_stop_notification_until",
             "tempc_ds",
             "timestamp",
         ).order_by('-timestamp')
 
         dev_breach = {}
         for reading in devs_with_temp_breach:
-            owner, owner_email, dev_name, max_temp, recent_temp, timestamp = reading
+            owner, owner_email, dev_name, max_temp, stop_notification_until, recent_temp, timestamp = reading
             if owner in dev_breach:
                 dev_breach[owner]['counter'] += 1
                 dev_breach[owner]['data'].append(reading)
@@ -42,7 +44,6 @@ class Command(BaseCommand):
                         'counter': 1,
                         'data': [reading],
                     }
-
         if (
                 (
                     len(dev_breach.items()) == 1 and
@@ -57,9 +58,9 @@ class Command(BaseCommand):
                     [
                         '_'.join(
                             (owner,dev_name))
-                    for owner, emails, dev_name, max_temp, temp, timestamp in data['data']])
-                devices = [dev_name for owner, emails, dev_name, max_temp, temp, timestamp in data['data']]
-                emails = [emails for owner, emails, dev_name, max_temp, temp, timestamp in data['data']]
+                    for owner, emails, dev_name, max_temp, stop_notification_until, temp, timestamp in data['data']])
+                devices = [dev_name for owner, emails, dev_name, max_temp, stop_notification_until, temp, timestamp in data['data']]
+                emails = [emails for owner, emails, dev_name, max_temp, stop_notification_until, temp, timestamp in data['data']]
 
                 message = mail.build_message_body(
                     to_email=','.join(emails[0].split(',')),
@@ -84,7 +85,7 @@ class Command(BaseCommand):
 def build_html_message(dev_owner: str, devices: list):
     with open('api/media/temp_breach_email_notification.html', 'r') as html_file:
         device_datas = []
-        for owner, owner_email, dev_name, max_temp, recent_temp, timestamp in devices:
+        for owner, owner_email, dev_name, max_temp, stop_notification_until, recent_temp, timestamp in devices:
             device_tags = '<td>' + '</td><td>'.join((dev_name, str(recent_temp), str(max_temp), str(timestamp))) + '</td>'
             device_datas.append(device_tags)
 
