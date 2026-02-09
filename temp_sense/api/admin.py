@@ -13,17 +13,16 @@ class DeviceDataAdmin(admin.ModelAdmin):
     list_display = ("dev_name", "dev_eui", "dev_owner", 'latest_reading')
 
     def latest_reading(self, device_data_obj):
-        if (device_data_obj.device_readings.all() and
-                device_data_obj in DeviceData.devices_without_readings_in_the_last_hour()
-        ):
+        device_readings = device_data_obj.device_readings
+        if (device_data_obj.devices_without_readings_in_the_last_hour() and
+                device_readings.exists()):
             latest_reading = (
-                DeviceReading.objects.filter(dev_eui=device_data_obj)
-                .order_by("-timestamp")
+                device_readings.order_by("-timestamp")
                 .first()
                 .timestamp.strftime("%d-%m-%Y %H:%M")
             )
             return f'{latest_reading}'
-        if not device_data_obj.device_readings.all():
+        else:
             return 'No readings yet'
 
     latest_reading.short_description = "Latest reading"
