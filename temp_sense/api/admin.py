@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.utils.html import format_html
 
 from .models import (
     DeviceData,
@@ -11,9 +10,9 @@ from .models import (
 
 
 class DeviceDataAdmin(admin.ModelAdmin):
-    list_display = ("dev_name", "dev_eui", "dev_owner", "no_readings")
+    list_display = ("dev_name", "dev_eui", "dev_owner", 'latest_reading')
 
-    def no_readings(self, device_data_obj):
+    def latest_reading(self, device_data_obj):
         if (device_data_obj.device_readings.all() and
                 device_data_obj in DeviceData.devices_without_readings_in_the_last_hour()
         ):
@@ -21,19 +20,13 @@ class DeviceDataAdmin(admin.ModelAdmin):
                 DeviceReading.objects.filter(dev_eui=device_data_obj)
                 .order_by("-timestamp")
                 .first()
-                .timestamp.strftime("%H:%M, %d-%m-%Y")
+                .timestamp.strftime("%d-%m-%Y %H:%M")
             )
-            return format_html(
-                '<span style="color: red; font-weight: bold;">{}</span>',
-                f"No readings in the last hour, latest reading at: {latest_reading}",
-            )
+            return f'{latest_reading}'
         if not device_data_obj.device_readings.all():
-            return format_html(
-                '<span style="color: red; font-weight: bold;">{}</span>',
-                f"This sensor does not have any readings yet",
-            )
+            return 'No readings yet'
 
-    no_readings.short_description = "No Readings"
+    latest_reading.short_description = "Latest reading"
 
 
 class DeviceReadingAdmin(admin.ModelAdmin):
