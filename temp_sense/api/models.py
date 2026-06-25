@@ -74,6 +74,7 @@ class DeviceData(models.Model):
     dev_name = models.CharField(max_length=50)
     dev_max_accepted_temp = models.FloatField()
     dev_min_accepted_temp = models.FloatField(default=-18)
+    dev_cooling_type = models.CharField(max_length=100, default='')
     dev_owner = models.ForeignKey(
         "DeviceOwner",
         on_delete=models.SET_NULL,
