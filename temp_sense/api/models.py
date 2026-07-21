@@ -146,20 +146,13 @@ def create_chirpstack_entity(sender, instance, created, **kwargs):
 
 
 class BulkDeviceUpload(models.Model):
-    owner = models.CharField(
-        choices=[
-            (v[0], v[0].upper())
-            for v in DeviceOwner.objects.all().values_list('name')
-        ],
-        max_length=100,
-        default=''
+    owner = models.ForeignKey(
+        DeviceOwner,
+        on_delete=models.CASCADE,
     )
     dev_name_prefix = models.CharField(max_length=20, default='LGT')
     upload_file = models.FileField(upload_to='uploads')
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f'{self.owner}'
 
 
 @receiver(post_save, sender=BulkDeviceUpload)

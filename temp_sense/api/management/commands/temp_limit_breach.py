@@ -3,7 +3,7 @@ import logging
 from api import utils
 from api import discord
 from api import mail
-from api.models import DeviceReading
+from api.models import DeviceReading, DeviceData, DeviceOwner
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -15,78 +15,81 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        devs_with_temp_breach = DeviceReading.objects.filter(
-            timestamp__gte=utils.minutes_ago(
-                settings.TEMP_BREACH_OBSERVATION_WINDOW
-            ),
-            tempc_ds__gte=F("dev_eui__dev_max_accepted_temp"),
-            dev_eui__dev_stop_notification_until__lte=utils.get_current_time()
-        ).values_list(
-            "dev_eui__dev_owner__name",
-            "dev_eui__dev_owner__email",
-            "dev_eui__dev_name",
-            "dev_eui__dev_max_accepted_temp",
-            "dev_eui__dev_stop_notification_until",
-            "tempc_ds",
-            "timestamp",
-        ).order_by('-timestamp')
+        devices_with_temp_breach = (
+            DeviceData.objects
+            .filter(
+                device_readings__timestamp__gte=utils.minutes_ago(
+                    settings.TEMP_BREACH_OBSERVATION_WINDOW
+                ),
+                device_readings__tempc_ds__gte=F("dev_max_accepted_temp"),
+                dev_stop_notification_until__lte=utils.get_current_time()
+            ).distinct()
+        )
 
-        dev_breach = {}
-        for reading in devs_with_temp_breach:
-            owner, owner_email, dev_name, max_temp, stop_notification_until, recent_temp, timestamp = reading
-            if owner in dev_breach:
-                dev_breach[owner]['counter'] += 1
-                dev_breach[owner]['data'].append(reading)
-                if dev_name not in dev_breach[owner]['data'][-1][2]:
-                    dev_breach[owner]['data'].append(reading)
-            else:
-                dev_breach[owner] = {
-                        'counter': 1,
-                        'data': [reading],
-                    }
-        if (
-                (
-                    len(dev_breach.items()) == 1 and
-                    list(dev_breach.items())[0][1]['counter'] >= settings.MAX_READING_BREACHES
-                ) or
-                (len(dev_breach.items()) >= settings.MAX_READING_BREACHES)
-        ):
+        breaching_devices = [
+            device
+            for device in devices_with_temp_breach
+            if device_has_2_consecutive_breaches(device)
+        ]
 
-            dev_and_owner = []
-            for owner, data in dev_breach.items():
-                dev_and_owner.extend(
-                    [
-                        '_'.join(
-                            (owner,dev_name))
-                    for owner, emails, dev_name, max_temp, stop_notification_until, temp, timestamp in data['data']])
-                devices = [dev_name for owner, emails, dev_name, max_temp, stop_notification_until, temp, timestamp in data['data']]
-                emails = [emails for owner, emails, dev_name, max_temp, stop_notification_until, temp, timestamp in data['data']]
+        for owner in [device.dev_owner for device in breaching_devices]:
+            owner_devices = [
+                device
+                for device in breaching_devices
+                if device.dev_owner == owner
+            ]
+            device_names = [device.dev_name for device in owner_devices]
+            message = mail.build_message_body(
+                to_email=','.join(owner.email.split(',')),
+                subject=f"Temp limit breach {owner.name}: {','.join(device_names)}",
+                message_body=build_html_message(owner.name, owner_devices),
+                to_html=True,
+            )
 
-                message = mail.build_message_body(
-                    to_email=','.join(emails[0].split(',')),
-                    subject=f"Temp limit breach {owner}: {','.join(devices)}",
-                    message_body=build_html_message(owner, data['data']),
-                    to_html=True,
-                )
+            mail.send_email(
+                to_email=owner.email.split(','),
+                message_body=message
+            )
 
-                mail.send_email(
-                    to_email=emails[0].split(','),
-                    message_body=message
-                )
-
-            notification_message = "\n".join(set(dev_and_owner))
-            discord.send_message(f"Temp limit breach >1/h on devices:" f"\n {notification_message}")
+            discord.send_message(f"Temp limit breach >1/h on devices:" f"\n {device_names}")
             logger.info("Successfully sent discord notification")
 
         else:
             logger.info("\n No temp limit breach")
 
 
+def device_has_2_consecutive_breaches(device: DeviceData):
+    last_2_readings = device.device_readings.order_by('-timestamp')[:2]
+    cleaned_readings = clean_readings_for_probe_malfunction(last_2_readings)
+    consecutive_breaches = [r for r in cleaned_readings if r >= device.dev_max_accepted_temp]
+    if consecutive_breaches:
+        return True
+    return False
+
+
+def clean_readings_for_probe_malfunction(readings):
+    reading_values = readings.values_list('tempc_ds', 'tempc_sht')
+    cleaned_readings = []
+    for probe_reading, sensor_reading in reading_values:
+        if probe_reading == settings.PROBE_MALFUNCTION_TEMP_VALUE:
+            cleaned_readings.append(sensor_reading)
+        else:
+            cleaned_readings.append(probe_reading)
+    return cleaned_readings
+
+
 def build_html_message(dev_owner: str, devices: list):
     with open('api/media/temp_breach_email_notification.html', 'r') as html_file:
         device_datas = []
-        for owner, owner_email, dev_name, max_temp, stop_notification_until, recent_temp, timestamp in devices:
-            device_tags = '<td>' + '</td><td>'.join((dev_name, str(recent_temp), str(max_temp), str(timestamp))) + '</td>'
+        for device in devices:
+            device_tags = '<td>' + '</td><td>'.join(
+                (
+                    device.dev_name,
+                    str(device.device_readings.first().tempc_ds),
+                    str(device.dev_max_accepted_temp),
+                    str(device.device_readings.first().timestamp)
+                )
+            ) + '</td>'
             device_datas.append(device_tags)
 
         html_text = html_file.read()
